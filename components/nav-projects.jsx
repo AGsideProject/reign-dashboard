@@ -18,14 +18,16 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { Separator } from "./ui/separator";
 
 export function NavProjects({ projects }) {
   const { isMobile } = useSidebar();
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-      <SidebarGroupLabel>Projects</SidebarGroupLabel>
-      <SidebarMenu>
+      {/* <SidebarGroupLabel>Projects</SidebarGroupLabel> */}
+      <Separator />
+      <SidebarMenu className="mt-5">
         {projects.map((item) => (
           <SidebarMenuItem key={item.name}>
             <SidebarMenuButton asChild>
@@ -63,12 +65,12 @@ export function NavProjects({ projects }) {
             </DropdownMenu>
           </SidebarMenuItem>
         ))}
-        <SidebarMenuItem>
+        {/* <SidebarMenuItem>
           <SidebarMenuButton className="text-sidebar-foreground/70">
             <MoreHorizontal className="text-sidebar-foreground/70" />
             <span>More</span>
           </SidebarMenuButton>
-        </SidebarMenuItem>
+        </SidebarMenuItem> */}
       </SidebarMenu>
     </SidebarGroup>
   );

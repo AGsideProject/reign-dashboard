@@ -12,6 +12,7 @@ import {
   PieChart,
   Settings2,
   SquareTerminal,
+  User,
 } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
@@ -29,9 +30,9 @@ import {
 // This is sample data.
 const data = {
   user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
+    name: "reign",
+    email: "reign@example.com",
+    avatar: "/avatars/reign.jpg",
   },
   teams: [
     {
@@ -139,20 +140,20 @@ const data = {
   ],
   projects: [
     {
-      name: "Design Engineering",
-      url: "#",
-      icon: Frame,
+      name: "Models",
+      url: "/models",
+      icon: User,
     },
-    {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: PieChart,
-    },
-    {
-      name: "Travel",
-      url: "#",
-      icon: Map,
-    },
+    // {
+    //   name: "Sales & Marketing",
+    //   url: "#",
+    //   icon: PieChart,
+    // },
+    // {
+    //   name: "Travel",
+    //   url: "#",
+    //   icon: Map,
+    // },
   ],
 };
 
@@ -160,15 +161,16 @@ export function AppSidebar({ ...props }) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <TeamSwitcher teams={data.teams} />
+        {/* <TeamSwitcher teams={data.teams} /> */}
+        <NavUser user={data.user} />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        {/* <NavMain items={data.navMain} /> */}
         <NavProjects projects={data.projects} />
       </SidebarContent>
-      <SidebarFooter>
+      {/* <SidebarFooter>
         <NavUser user={data.user} />
-      </SidebarFooter>
+      </SidebarFooter> */}
       <SidebarRail />
     </Sidebar>
   );
