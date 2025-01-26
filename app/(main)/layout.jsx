@@ -8,6 +8,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Toaster } from "@/components/ui/toaster";
 
 import { Separator } from "@/components/ui/separator";
 
@@ -22,6 +23,7 @@ export default function RootLayout({ children }) {
     <SidebarProvider>
       <AppSidebar />
       {children}
+      <Toaster />
     </SidebarProvider>
   );
 }

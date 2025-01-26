@@ -8,6 +8,7 @@ import {
   Command,
   Frame,
   GalleryVerticalEnd,
+  Home,
   Map,
   PieChart,
   Settings2,
@@ -139,6 +140,11 @@ const data = {
     },
   ],
   projects: [
+    {
+      name: "Home",
+      url: "/",
+      icon: Home,
+    },
     {
       name: "Models",
       url: "/models",
