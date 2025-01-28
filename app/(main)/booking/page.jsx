@@ -160,7 +160,7 @@ export default function Component() {
               <tr key={rowIndex} className="hover:bg-transparent">
                 {columns.map((_column, colIndex) => (
                   <td key={colIndex} className="py-4">
-                    <div className="animate-pulse rounded-md bg-muted h-4 w-full" />
+                    <div className="animate-pulse rounded-md bg-muted h-6 w-full" />
                   </td>
                 ))}
               </tr>
@@ -194,7 +194,7 @@ export default function Component() {
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  No booking requests have been made yet.
                 </TableCell>
               </TableRow>
             )}

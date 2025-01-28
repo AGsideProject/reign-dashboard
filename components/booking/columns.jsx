@@ -35,7 +35,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import fetchGlobal from "@/lib/fetch-data";
 
@@ -113,12 +112,12 @@ const columns = [
     cell: ({ row }) => <div>{formatDateV1(row.getValue("shoot_date"))}</div>,
   },
   {
-    header: "PIC",
+    header: "Changed by",
     accessorKey: "User",
     size: 100,
     cell: ({ row }) => {
       const pic = row.getValue("User") || {};
-      return <div>{pic.name || "-"}</div>;
+      return <div>{pic.full_name || "-"}</div>;
     },
   },
   {
@@ -132,9 +131,7 @@ const columns = [
 
 export default columns;
 
-function RowActions({ row }) {
-  console.log(row, "<<row");
-
+const RowActions = ({ row }) => {
   const [openDialog, setOpenDialog] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -152,6 +149,7 @@ function RowActions({ row }) {
   const handleClickButton = async (e) => {
     e.preventDefault();
     setError("");
+    if (loading) return;
     try {
       const bookingId = row.original.id;
       let endpoint;
@@ -171,9 +169,13 @@ function RowActions({ row }) {
       }
 
       const result = await fetchGlobal(endpoint, options, true);
-      setLoading(false);
-      setOpenDialog(false);
-      console.log("Success:", result);
+      if (result) {
+        setLoading(false);
+        setOpenDialog(false);
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      }
     } catch (error) {
       setLoading(false);
       setError(error?.message || "Some thing when wrong");
@@ -208,7 +210,7 @@ function RowActions({ row }) {
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
-            {status === "ongoing" && (
+            {status === "incoming" && (
               <DropdownMenuItem
                 className="focus:text-blue-500"
                 onSelect={(event) => handleClickSelect(event, "process")}
@@ -242,7 +244,7 @@ function RowActions({ row }) {
               </DropdownMenuItem>
             )}
           </DropdownMenuGroup>
-          <DropdownMenuSeparator />
+          {status !== "done" && <DropdownMenuSeparator />}
           <DropdownMenuItem
             className="text-destructive focus:text-destructive"
             onSelect={(event) => handleClickSelect(event, "delete")}
@@ -404,4 +406,4 @@ function RowActions({ row }) {
       </AlertDialog>
     </>
   );
-}
+};

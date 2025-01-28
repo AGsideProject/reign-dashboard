@@ -9,6 +9,7 @@ import {
   Frame,
   GalleryVerticalEnd,
   Home,
+  LogOut,
   Map,
   PieChart,
   Settings2,
@@ -24,9 +25,15 @@ import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
+  SidebarGroup,
   SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
+import { Separator } from "@radix-ui/react-dropdown-menu";
+import fetchGlobal from "@/lib/fetch-data";
 
 // This is sample data.
 const data = {
@@ -164,19 +171,49 @@ const data = {
 };
 
 export function AppSidebar({ ...props }) {
+  const user = localStorage.getItem("user");
+  const theUser = JSON.parse(user);
+
+  const handleLogout = async () => {
+    try {
+      await fetchGlobal("/v1/logout", {
+        method: "POST",
+      });
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+    sessionStorage.removeItem("access_token");
+    localStorage.removeItem("user");
+    window.location.href = "/login";
+  };
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         {/* <TeamSwitcher teams={data.teams} /> */}
-        <NavUser user={data.user} />
+        <NavUser user={theUser} />
       </SidebarHeader>
       <SidebarContent>
         {/* <NavMain items={data.navMain} /> */}
         <NavProjects projects={data.projects} />
+        <SidebarGroup className="group-data-[collapsible=icon]:hidden">
+          <Separator />
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild onClick={handleLogout}>
+                <div className="flex gap-4 items-center text-destructive hover:text-destructive ">
+                  <LogOut size={14} />
+                  Logout
+                </div>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroup>
       </SidebarContent>
       {/* <SidebarFooter>
         <NavUser user={data.user} />
       </SidebarFooter> */}
+
       <SidebarRail />
     </Sidebar>
   );

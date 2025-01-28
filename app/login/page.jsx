@@ -1,4 +1,6 @@
-import { LoginForm } from "@/components/login/login-form";
+import dynamic from "next/dynamic";
+
+const LoginForm = dynamic(() => import("@/components/login/login-form"));
 
 export default function LoginPage() {
   return (
