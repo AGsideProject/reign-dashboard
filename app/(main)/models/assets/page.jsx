@@ -46,6 +46,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import {
   Archive,
+  Loader2,
   LucideSave,
   MoreHorizontal,
   Plus,
@@ -77,8 +78,20 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import Image from "next/image";
+import { useToast } from "@/hooks/use-toast";
 
+import Image from "next/image";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 function throttle(func, limit) {
   let lastFunc;
   let lastRan;
@@ -99,11 +112,12 @@ function throttle(func, limit) {
   };
 }
 const accToken =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3ODM4NGUzLTY4OTAtODAwMy05YTNiLThjNjBjMmEyMTA1YSIsImVtYWlsIjoiYWxkb21hcmNlbGlubzAxQGdtYWlsLmNvbSIsImlhdCI6MTczNzg4OTM5NSwiZXhwIjoxNzM3ODkyOTk1fQ.xEz9FBR3r5a2ZZw2E-a5g3-g2rIQ1HSb062Y9M6NEmA";
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjcwYjY2OWYyLWYyZjAtNDBhMi1iZTA3LTBjNzVhNWM1ZjgxYiIsImVtYWlsIjoiYWxkb21hcmNlbGlubzAxQGdtYWlsLmNvbSIsImlhdCI6MTczODIzOTQ2MywiZXhwIjoxNzM4MjQzMDYzfQ.EBOxBiLNDtgyzvvjuKmdxpPlkRQlQHDgK-0sNgaVfXA";
 
 const url = "https://reign-service.onrender.com";
 
 export default function Page() {
+  const { toast } = useToast();
   const [tabsValue, setTabsValue] = useState("carousel");
   const router = useRouter();
   const params = useParams();
@@ -111,6 +125,7 @@ export default function Page() {
   const [images, setImages] = useState([]);
   const [domLoaded, setDomLoaded] = useState(false);
   const [positions, setPositions] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const [imagesUpdate, setImagesUpdate] = useState(false);
 
@@ -125,7 +140,7 @@ export default function Page() {
       [index]: isOpen, // Track the open state for each index
     }));
   };
-  const [carouselSheet, setCarouselSheet] = useState(false);
+  const [assetSheet, setAssetSheet] = useState(false);
   //! untuk handle dropdown menu di setiap photo
 
   //! INI FUNCTION BARU BUAT DRAG IMAGE
@@ -146,7 +161,7 @@ export default function Page() {
 
     setImages(updatedImage);
     setDraggingStyle({ display: "none" }); // Hide the ghost element
-    setImagesUpdate(true);
+    // setImagesUpdate(true);
   }
 
   function handleDragStart(index, event) {
@@ -187,116 +202,127 @@ export default function Page() {
 
   const [photoPositionOptions, setPhotoPositionOptions] = useState([]);
 
+  //! data static
+  // useEffect(() => {
+  //   setDomLoaded(true);
+  //   const data = [
+  //     {
+  //       url: "https://images.unsplash.com/photo-1526510747491-58f928ec870f?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  //     },
+  //     {
+  //       url: "https://images.unsplash.com/photo-1498982261566-1c28c9cf4c02?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  //     },
+  //     {
+  //       url: "https://images.unsplash.com/photo-1467632499275-7a693a761056?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  //     },
+  //     {
+  //       url: "https://images.unsplash.com/photo-1515511624704-b8916dcc30ea?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  //     },
+  //     {
+  //       url: "https://images.unsplash.com/photo-1543096222-72de739f7917?q=80&w=2000&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  //     },
+  //     {
+  //       url: "https://images.unsplash.com/photo-1574015974293-817f0ebebb74?q=80&w=2080&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  //     },
+  //     {
+  //       url: "https://images.unsplash.com/photo-1524502397800-2eeaad7c3fe5?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  //     },
+  //     {
+  //       url: "https://images.unsplash.com/photo-1541519481457-763224276691?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  //     },
+  //     {
+  //       url: "https://images.unsplash.com/photo-1465145498025-928c7a71cab9?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  //     },
+  //     {
+  //       url: "https://images.unsplash.com/photo-1536180931879-fd2d652efddc?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  //     },
+  //     {
+  //       url: "https://images.unsplash.com/photo-1594843310428-7eb6729555e9?q=80&w=2839&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  //     },
+  //     {
+  //       url: "https://images.unsplash.com/photo-1729116283190-518c3b8c1d1f?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  //     },
+  //     {
+  //       url: "https://images.unsplash.com/photo-1701351382146-035bd68cdb6d?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  //     },
+  //     {
+  //       url: "https://images.unsplash.com/photo-1639676994754-d3488a9e491a?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  //     },
+  //   ];
+
+  //   // setImages([
+  //   //   {
+  //   //     url: "https://images.unsplash.com/photo-1526510747491-58f928ec870f?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  //   //   },
+  //   //   {
+  //   //     url: "https://images.unsplash.com/photo-1498982261566-1c28c9cf4c02?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  //   //   },
+  //   //   {
+  //   //     url: "https://images.unsplash.com/photo-1467632499275-7a693a761056?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  //   //   },
+  //   //   {
+  //   //     url: "https://images.unsplash.com/photo-1515511624704-b8916dcc30ea?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  //   //   },
+  //   //   {
+  //   //     url: "https://images.unsplash.com/photo-1543096222-72de739f7917?q=80&w=2000&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  //   //   },
+  //   //   {
+  //   //     url: "https://images.unsplash.com/photo-1574015974293-817f0ebebb74?q=80&w=2080&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  //   //   },
+  //   //   {
+  //   //     url: "https://images.unsplash.com/photo-1524502397800-2eeaad7c3fe5?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  //   //   },
+  //   //   {
+  //   //     url: "https://images.unsplash.com/photo-1541519481457-763224276691?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  //   //   },
+  //   //   {
+  //   //     url: "https://images.unsplash.com/photo-1465145498025-928c7a71cab9?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  //   //   },
+  //   //   {
+  //   //     url: "https://images.unsplash.com/photo-1536180931879-fd2d652efddc?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  //   //   },
+  //   //   {
+  //   //     url: "https://images.unsplash.com/photo-1594843310428-7eb6729555e9?q=80&w=2839&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  //   //   },
+  //   //   {
+  //   //     url: "https://images.unsplash.com/photo-1729116283190-518c3b8c1d1f?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  //   //   },
+  //   //   {
+  //   //     url: "https://images.unsplash.com/photo-1701351382146-035bd68cdb6d?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  //   //   },
+  //   //   {
+  //   //     url: "https://images.unsplash.com/photo-1639676994754-d3488a9e491a?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  //   //   },
+  //   // ]);
+
+  //   const updatedImages = data.map((item, index) => {
+  //     return { ...item, id: index + 1, order: index + 1 };
+  //   });
+
+  //   // const photosOptions = updatedImages.map((item, index) => {
+  //   //   return {
+  //   //     value: item.order.toString(),
+  //   //   };
+  //   // });
+  //   // setPhotoPositionOptions(photosOptions);
+  //   setImages(updatedImages);
+  //   setPositions(new Array(14).fill({ x: 0, y: 0 }));
+  //   // setImagesUpdate(false);
+  // }, []);
+
+  //! INI STTE DAN FUNCTION BUAT HANDLE ADD PHOTOS PORTRAIT DAN LANDSCAPE
+  //! data static
+
+  const [selectedPhotosPortrait, setSelectedPhotosPortrait] = useState([]);
+  const [selectedPhotosLandscape, setSelectedPhotosLandscape] = useState([]);
+  const [isExeeded, setIsExeeded] = useState(false);
+
   useEffect(() => {
-    setDomLoaded(true);
-    const data = [
-      {
-        url: "https://images.unsplash.com/photo-1526510747491-58f928ec870f?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      },
-      {
-        url: "https://images.unsplash.com/photo-1498982261566-1c28c9cf4c02?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      },
-      {
-        url: "https://images.unsplash.com/photo-1467632499275-7a693a761056?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      },
-      {
-        url: "https://images.unsplash.com/photo-1515511624704-b8916dcc30ea?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      },
-      {
-        url: "https://images.unsplash.com/photo-1543096222-72de739f7917?q=80&w=2000&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      },
-      {
-        url: "https://images.unsplash.com/photo-1574015974293-817f0ebebb74?q=80&w=2080&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      },
-      {
-        url: "https://images.unsplash.com/photo-1524502397800-2eeaad7c3fe5?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      },
-      {
-        url: "https://images.unsplash.com/photo-1541519481457-763224276691?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      },
-      {
-        url: "https://images.unsplash.com/photo-1465145498025-928c7a71cab9?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      },
-      {
-        url: "https://images.unsplash.com/photo-1536180931879-fd2d652efddc?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      },
-      {
-        url: "https://images.unsplash.com/photo-1594843310428-7eb6729555e9?q=80&w=2839&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      },
-      {
-        url: "https://images.unsplash.com/photo-1729116283190-518c3b8c1d1f?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      },
-      {
-        url: "https://images.unsplash.com/photo-1701351382146-035bd68cdb6d?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      },
-      {
-        url: "https://images.unsplash.com/photo-1639676994754-d3488a9e491a?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      },
-    ];
-
-    // setImages([
-    //   {
-    //     url: "https://images.unsplash.com/photo-1526510747491-58f928ec870f?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    //   },
-    //   {
-    //     url: "https://images.unsplash.com/photo-1498982261566-1c28c9cf4c02?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    //   },
-    //   {
-    //     url: "https://images.unsplash.com/photo-1467632499275-7a693a761056?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    //   },
-    //   {
-    //     url: "https://images.unsplash.com/photo-1515511624704-b8916dcc30ea?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    //   },
-    //   {
-    //     url: "https://images.unsplash.com/photo-1543096222-72de739f7917?q=80&w=2000&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    //   },
-    //   {
-    //     url: "https://images.unsplash.com/photo-1574015974293-817f0ebebb74?q=80&w=2080&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    //   },
-    //   {
-    //     url: "https://images.unsplash.com/photo-1524502397800-2eeaad7c3fe5?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    //   },
-    //   {
-    //     url: "https://images.unsplash.com/photo-1541519481457-763224276691?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    //   },
-    //   {
-    //     url: "https://images.unsplash.com/photo-1465145498025-928c7a71cab9?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    //   },
-    //   {
-    //     url: "https://images.unsplash.com/photo-1536180931879-fd2d652efddc?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    //   },
-    //   {
-    //     url: "https://images.unsplash.com/photo-1594843310428-7eb6729555e9?q=80&w=2839&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    //   },
-    //   {
-    //     url: "https://images.unsplash.com/photo-1729116283190-518c3b8c1d1f?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    //   },
-    //   {
-    //     url: "https://images.unsplash.com/photo-1701351382146-035bd68cdb6d?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    //   },
-    //   {
-    //     url: "https://images.unsplash.com/photo-1639676994754-d3488a9e491a?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    //   },
-    // ]);
-
-    const updatedImages = data.map((item, index) => {
-      return { ...item, id: index + 1, order: index + 1 };
-    });
-
-    const photosOptions = updatedImages.map((item, index) => {
-      return {
-        value: item.order.toString(),
-      };
-    });
-    setPhotoPositionOptions(photosOptions);
-    setImages(updatedImages);
-    setPositions(new Array(14).fill({ x: 0, y: 0 }));
-    setImagesUpdate(false);
-  }, []);
-
-  const [selectedPhotos, setSelectedPhotos] = useState([]);
-
-  const handlePhotoSelection = (event) => {
+    const merge = [...selectedPhotosLandscape, ...selectedPhotosPortrait];
+    const filterPhoto = merge.filter((item) => item.file.size > 10_000_000);
+    setIsExeeded(filterPhoto.length > 0);
+  }, [selectedPhotosPortrait, selectedPhotosLandscape]);
+  const handlePhotoSelectionPortrait = (event) => {
     const files = Array.from(event.target.files);
     const newPhotos = files.map((file) => {
       return {
@@ -305,49 +331,375 @@ export default function Page() {
       };
     });
 
-    setSelectedPhotos((prevPhotos) => [...prevPhotos, ...newPhotos]);
+    setSelectedPhotosPortrait((prevPhotos) => [...prevPhotos, ...newPhotos]);
+  };
+  const handleDeletePhotoPortrait = (index) => {
+    setSelectedPhotosPortrait((prevPhotos) =>
+      prevPhotos.filter((_, i) => i !== index)
+    );
   };
 
-  const handleDeletePhoto = (index) => {
-    setSelectedPhotos((prevPhotos) => prevPhotos.filter((_, i) => i !== index));
-  };
-
-  const handleSubmitAssets = (e) => {
-    //! submit ke server
-    e.preventDefault();
-    const carouselData = selectedPhotos.map((item, index) => {
+  const handlePhotoSelectionLandscape = (event) => {
+    const files = Array.from(event.target.files);
+    const newPhotos = files.map((file) => {
       return {
-        id: index + 1,
-        image_file: item.file,
-        order: index + 1,
-        type: tabsValue,
+        file,
+        preview: URL.createObjectURL(file),
       };
     });
 
-    console.log(carouselData);
-    // console.log(selectedPhotos.map((photo) => photo.file));
+    setSelectedPhotosLandscape((prevPhotos) => [...prevPhotos, ...newPhotos]);
+    const filterPhoto = files.filter((item) => item.size > 10_000_000);
+  };
+
+  const handleDeletePhotoLandscape = (index) => {
+    setSelectedPhotosLandscape((prevPhotos) =>
+      prevPhotos.filter((_, i) => i !== index)
+    );
+  };
+
+  const handleAssetsSheetChange = (isOpen) => {
+    setAssetSheet(isOpen);
+    if (!isOpen) {
+      setSelectedPhotosLandscape([]);
+      setSelectedPhotosPortrait([]);
+      setIsExeeded(false);
+    }
+  };
+  //! INI STTE DAN FUNCTION BUAT HANDLE ADD PHOTOS PORTRAIT DAN LANDSCAPE
+
+  const [uploadCount, setUploadCount] = useState(0);
+
+  const handleSubmitAssets = async (e) => {
+    //! submit ke server
+    let successCount = 0;
+    e.preventDefault();
+    const dataPortrait = selectedPhotosPortrait.map((item, index) => {
+      return {
+        // id: index + 1, //! gak usah di kirim
+        image_file: item.file,
+        // order: index + 1, //! gak usah di kirim
+        type: tabsValue === "carousel" ? "carousel" : "polaroid",
+        model_id: Number(model_id),
+        orientation: "portrait",
+        status: "active",
+      };
+    });
+    const dataLandscape = selectedPhotosLandscape.map((item, index) => {
+      return {
+        // id: index + 1, //! gak usah di kirim
+        image_file: item.file,
+        // order: index + 1, //! gak usah di kirim
+        type: tabsValue === "carousel" ? "carousel" : "polaroid",
+        model_id: Number(model_id),
+        orientation: "landscape",
+        status: "active",
+      };
+    });
+
+    console.log({ dataPortrait, dataLandscape });
+
+    const mergeData = [...dataPortrait, ...dataLandscape];
+    console.log(mergeData, "< mergeData");
+    console.log(mergeData[0].image_file.size, "<");
+
+    for (const data of mergeData) {
+      const formData = new FormData();
+      formData.append("image_file", data.image_file);
+      formData.append("type", data.type);
+      formData.append("model_id", data.model_id);
+      formData.append("orientation", data.orientation);
+      formData.append("status", data.status);
+
+      try {
+        const res = await fetch(`${url}/v1/assets/admin`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${accToken}`,
+          },
+          body: formData,
+        });
+        console.log(res, "<res>");
+
+        const dat = await res.json();
+        console.log(dat, "<dat>");
+
+        successCount++;
+        setUploadCount(successCount);
+        console.log("Uploaded: ", data);
+      } catch (error) {
+        console.error("Upload failed: ", error);
+      }
+
+      // await new Promise((resolve) => setTimeout(resolve, 500));
+    }
+
+    // console.log(selectedPhotosPortrait.map((photo) => photo.file));
     // console.log(tabsValue);
   };
 
   const [changeOrderDialog, setChangeOrderDialog] = useState(false);
-  function saveFinalPhotosPosition() {
-    console.log(images);
+  async function saveFinalPhotosPosition() {
+    console.log(filteredAsset, "final sebelum di submit DB");
+    const body = filteredAsset.map((item, index) => {
+      return {
+        id: item.id,
+        order: item.order,
+      };
+    });
+    console.log(body, "< body sebelom dikirim");
+    try {
+      const response = await fetch(`${url}/v1/assets/admin/bulk-order`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accToken}`,
+        },
+        body: JSON.stringify({ assets: body }),
+      });
+
+      console.log(response, "< res");
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.statusText}`);
+      }
+      const data = await response.json();
+      console.log(data, "< data");
+
+      toast({
+        title: "KEGANTI BRO",
+        description: "DESKRIPSI BERHASIL",
+        variant: "default",
+      });
+
+      // fetchReignModels();
+      fetchModelAsset();
+      // setNewPhotoPosition("");
+      // setFormData(initialForm);
+    } catch (error) {
+      console.error("Error saving changes", error);
+
+      // toast({
+      //   title: "Wardrobe Malfunction! 🚨",
+      //   description:
+      //     "Oops! Looks like the fashion police rejected this one. Try again!",
+      //   variant: "destructive",
+      // });
+
+      // fetchReignModels();
+      // setFormData(initialForm);
+    }
   }
 
-  const [currentImagePosition, setCurrentImagePosition] = useState(0);
-  const handleChangePhotoPosition = (item) => {
+  const [currentImagePosition, setCurrentImagePosition] = useState({
+    assetId: 0,
+    currenctOrder: 0,
+  });
+  const handleChangePhotoPosition = (item, index) => {
     setChangeOrderDialog(true);
+    console.log(index, "<");
     console.log(item);
-    setCurrentImagePosition(item.order);
+    // setCurrentImagePosition({ assetId: item.id, currenctOrder: item.order });
+    setCurrentImagePosition({
+      assetId: item.id,
+      currenctOrder: Number(index + 1),
+    });
   };
 
   const [newPhotoPosition, setNewPhotoPosition] = useState("");
   console.log(newPhotoPosition, "<newPhotoPosition");
 
-  const handleSubmitChangePosition = (e) => {
+  const handleSubmitChangePosition = async (e) => {
     e.preventDefault();
     console.log({ newPhotoPosition, currentImagePosition });
+
+    console.log(filteredAsset);
+    const bodyTest = filteredAsset[newPhotoPosition - 1].order;
+    console.log(bodyTest);
+    try {
+      const response = await fetch(
+        `${url}/v1/assets/admin/${currentImagePosition.assetId}/order`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accToken}`,
+          },
+          body: JSON.stringify({ order: Number(bodyTest) }),
+        }
+      );
+
+      console.log(response, "< res");
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.statusText}`);
+      }
+      const data = await response.json();
+      console.log(data, "< data");
+
+      // toast({
+      //   title:
+      //     newStatus === "active"
+      //       ? "It's Show Time! 🎬"
+      //       : "Taking a Beauty Nap 😴",
+      //   description:
+      //     newStatus === "active"
+      //       ? "The model is now live and ready to slay the runway!"
+      //       : "Poof! This model is now hidden from the public eye.",
+      //   variant: "default",
+      // });
+
+      // fetchReignModels();
+      fetchModelAsset();
+      setNewPhotoPosition("");
+      // setFormData(initialForm);
+    } catch (error) {
+      console.error("Error saving changes", error);
+
+      // toast({
+      //   title: "Wardrobe Malfunction! 🚨",
+      //   description:
+      //     "Oops! Looks like the fashion police rejected this one. Try again!",
+      //   variant: "destructive",
+      // });
+
+      // fetchReignModels();
+      // setFormData(initialForm);
+    }
+    setChangeOrderDialog(false);
   };
+
+  //! =========================== REIGN API ===========================
+  const [modelAssetList, setModelAssetList] = useState([]);
+  const [filteredAsset, setFilteredAsset] = useState(modelAssetList);
+
+  useEffect(() => {
+    fetchModelAsset();
+  }, []);
+
+  useEffect(() => {
+    if (tabsValue === "carousel") {
+      setFilteredAsset(
+        modelAssetList?.carousel?.filter(
+          (item) => item.type === "carousel" && item.status === "active"
+        )
+      );
+    } else if (tabsValue === "polaroid") {
+      setFilteredAsset(
+        modelAssetList?.polaroid?.filter(
+          (item) => item.type === "polaroid" && item.status === "active"
+        )
+      );
+    } else if (tabsValue === "archive-carousel") {
+      setFilteredAsset(
+        modelAssetList?.carousel?.filter(
+          (item) => item.type === "carousel" && item.status === "inactive"
+        )
+      );
+    } else if (tabsValue === "archive-polaroid") {
+      setFilteredAsset(
+        modelAssetList?.polaroid?.filter(
+          (item) => item.type === "polaroid" && item.status === "inactive"
+        )
+      );
+    }
+
+    setImagesUpdate(false);
+  }, [tabsValue, modelAssetList]); // Include modelList in dependencies
+
+  useEffect(() => {
+    console.log(currentImagePosition, "< currentImagePosition");
+
+    if (tabsValue === "carousel") {
+      const options = filteredAsset?.map((item, index) => {
+        let _index = index + 1;
+        return {
+          value: _index.toString(),
+        };
+      });
+
+      // const options = filteredAsset.filter(
+      //   (item) => item.order != currentImagePosition
+      // );
+      console.log(options, "<options");
+
+      setPhotoPositionOptions(options);
+    } else if (tabsValue === "polaroid") {
+      const options = filteredAsset?.map((item, index) => {
+        let _index = index + 1;
+        return {
+          value: _index.toString(),
+        };
+      });
+
+      // const options = filteredAsset.filter(
+      //   (item) => item.order != currentImagePosition
+      // );
+      console.log(options, "<options");
+
+      setPhotoPositionOptions(options);
+    }
+  }, [currentImagePosition]);
+
+  //! INI FUNCTION BARU BUAT DRAG IMAGE
+  const dragImage_reignApi = useRef(0);
+  const draggedOverImage_reignApi = useRef(0);
+  const [draggingStyle_reignApi, setDraggingStyle_reignApi] = useState({
+    display: "none",
+  });
+
+  function handleSortImage_reignApi() {
+    const imageClone = [...filteredAsset];
+    const temp = imageClone[dragImage_reignApi.current];
+    imageClone[dragImage_reignApi.current] =
+      imageClone[draggedOverImage_reignApi.current];
+    imageClone[draggedOverImage_reignApi.current] = temp;
+
+    const updatedImage = imageClone.map((image, index) => ({
+      ...image,
+      order: index + 1,
+    }));
+
+    setFilteredAsset(updatedImage);
+    setDraggingStyle_reignApi({ display: "none" }); // Hide the ghost element
+    setImagesUpdate(true); //! flaggin untuk tombol save latest sort
+  }
+
+  function handleDragStart_reignApi(index, event) {
+    dragImage_reignApi.current = index;
+    const ghostElement = document.createElement("div");
+    ghostElement.style.width = "0px";
+    ghostElement.style.height = "0px";
+    event.dataTransfer.setDragImage(ghostElement, 0, 0);
+
+    setDraggingStyle_reignApi({
+      display: "block",
+      position: "fixed",
+      top: `${event.clientY}px`,
+      left: `${event.clientX}px`,
+      width: "50px",
+      height: "50px",
+      pointerEvents: "none",
+      zIndex: 9999,
+      transform: "translate(-50%, -50%)",
+      borderRadius: "0.5rem",
+      boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+      backgroundColor: "#f3f4f6",
+      overflow: "hidden",
+    });
+  }
+
+  const handleDrag_reignApi = useCallback(
+    throttle((event) => {
+      setDraggingStyle_reignApi((prev) => ({
+        ...prev,
+        top: `${event.clientY}px`,
+        left: `${event.clientX}px`,
+      }));
+    }, 100), // Adjust the throttle delay (100ms is reasonable for smoothness)
+    []
+  );
+  //! INI FUNCTION BARU BUAT DRAG IMAGE
 
   const fetchModelAsset = async () => {
     try {
@@ -360,14 +712,108 @@ export default function Page() {
       const data = await response.json();
       console.log(data, "< model asset data");
       // setModelList(data.data);
+      setModelAssetList(data.data);
     } catch (error) {
       console.log(error);
     }
   };
 
-  useEffect(() => {
-    fetchModelAsset();
-  }, []);
+  const handleStatusChange = async (status, id) => {
+    console.log(status, id);
+    let newStatus = status === "active" ? "inactive" : "active";
+    console.log(newStatus);
+    try {
+      const _formBody = new URLSearchParams();
+      _formBody.append("status", newStatus);
+
+      const response = await fetch(`${url}/v1/assets/admin/${id}/status`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Authorization: `Bearer ${accToken}`,
+        },
+        body: _formBody.toString(), // Correctly formatted body
+      });
+
+      console.log(response, "< res");
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.statusText}`);
+      }
+
+      toast({
+        title:
+          newStatus === "active"
+            ? "It's Show Time! 🎬"
+            : "Taking a Beauty Nap 😴",
+        description:
+          newStatus === "active"
+            ? "The model is now live and ready to slay the runway!"
+            : "Poof! This model is now hidden from the public eye.",
+        variant: "default",
+      });
+      // fetchReignModels();
+      fetchModelAsset();
+      // setFormData(initialForm);
+    } catch (error) {
+      console.error("Error saving changes", error);
+
+      toast({
+        title: "Wardrobe Malfunction! 🚨",
+        description:
+          "Oops! Looks like the fashion police rejected this one. Try again!",
+        variant: "destructive",
+      });
+
+      fetchReignModels();
+      setFormData(initialForm);
+    }
+  };
+
+  // console.log(filteredAsset);
+  console.log(isExeeded, "< isEx");
+
+  const [deleteDialogAsset, setDeleteDialogAsset] = useState(false);
+  const [assetId, setAssetId] = useState(0);
+  const handleDeleteAsset = (asset) => {
+    console.log(asset);
+    setDeleteDialogAsset(true);
+    setAssetId(asset.id);
+  };
+  const deleteAsset = async () => {
+    try {
+      setLoading(true);
+      // const id = formData.id;
+      const response = await fetch(`${url}/v1/assets/admin/${assetId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${accToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log(data, "< data");
+      toast({
+        title: "Buh-Bye! 👋",
+        description: "That asset off to the digital afterlife.",
+        variant: "default", // You can use "destructive" for error messages
+        className: "bg-emerald-50 text-black",
+      });
+      setLoading(false);
+      // fetchReignModels();
+      fetchModelAsset();
+      setDeleteDialogAsset(false);
+      setAssetId(0);
+      // setFormData(initialForm);
+    } catch (error) {
+      console.error("Error deleting model:", error);
+    }
+  };
+
   return (
     <SidebarInset>
       <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
@@ -387,6 +833,12 @@ export default function Page() {
               <BreadcrumbItem>
                 <BreadcrumbPage>{model}</BreadcrumbPage>
               </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage className="first-letter:uppercase">
+                  {tabsValue}
+                </BreadcrumbPage>
+              </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
         </div>
@@ -394,7 +846,7 @@ export default function Page() {
 
       <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
         <Tabs
-          defaultValue={tabsValue}
+          defaultValue={"static"}
           className="mt-2"
           onValueChange={(value) => setTabsValue(value)}
           value={tabsValue}
@@ -408,10 +860,10 @@ export default function Page() {
                 Carousel
               </TabsTrigger>
               <TabsTrigger
-                value="polaroids"
-                onClick={() => setTabsValue("polaroids")}
+                value="polaroid"
+                onClick={() => setTabsValue("polaroid")}
               >
-                Polaroids
+                Polaroid
               </TabsTrigger>
             </TabsList>
 
@@ -441,30 +893,44 @@ export default function Page() {
                   // className="rounded-full"
                   size="icon"
                   variant="outline"
-                  onClick={() => setCarouselSheet(true)}
+                  onClick={handleAssetsSheetChange}
                 >
                   <PlusIcon />
                 </Button>
               </div>
             ) : (
-              <div>
+              <div className="flex items-center">
+                {imagesUpdate && (
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="mr-2"
+                    onClick={saveFinalPhotosPosition}
+                  >
+                    <SaveAll />
+                  </Button>
+                )}
                 <Button
                   variant="outline"
                   size="icon"
-                  className="mr-3"
-                  onClick={() => setTabsValue("archive-polaroids")}
+                  className="mr-2"
+                  onClick={() => setTabsValue("archive-polaroid")}
                 >
                   <Archive />
                 </Button>
-                <Button className="rounded-full" size="icon" variant="outline">
+                <Button
+                  size="icon"
+                  variant="outline"
+                  onClick={handleAssetsSheetChange}
+                >
                   <PlusIcon />
                 </Button>
               </div>
             )}
           </div>
-          {/* <Separator className="my-5" /> */}
 
-          <TabsContent value="carousel">
+          {/* //! content static */}
+          {/* <TabsContent value="static">
             <div className="relative">
               <div
                 className="absolute pointer-events-none"
@@ -476,7 +942,6 @@ export default function Page() {
                 />
               </div>
               <div className="grid auto-rows-min gap-2 grid-cols-3 md:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10">
-                {/* //! ini yang paling baru draggable */}
                 {images.map((item, index) => (
                   <div
                     className="bg-muted/50 rounded-t-xl"
@@ -516,8 +981,9 @@ export default function Page() {
                               Test data
                             </DropdownMenuItem>
                             <DropdownMenuItem
-                              // onClick={() => console.log(item)}
-                              onClick={() => handleChangePhotoPosition(item)}
+                              onClick={() =>
+                                handleChangePhotoPosition(item, index)
+                              }
                             >
                               Change position
                             </DropdownMenuItem>
@@ -542,44 +1008,97 @@ export default function Page() {
                     </div>
                   </div>
                 ))}
+           
+              </div>
+            </div>
+          </TabsContent> */}
+          {/* //! content static */}
+
+          <TabsContent value={tabsValue}>
+            <div className="relative">
+              {/* <div
+                className="absolute pointer-events-none"
+                style={draggingStyle_reignApi}
+              >
+                <img
+                  src={filteredAsset[dragImage_reignApi.current]?.img_url}
+                  className="object-cover w-full h-full"
+                />
+              </div> */}
+              <div className="grid auto-rows-min gap-2 grid-cols-3 md:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10">
                 {/* //! ini yang paling baru draggable */}
-                {/* <div className="aspect-square bg-red-300 relative">
-                  <Image
-                    src="https://images.unsplash.com/photo-1536180931879-fd2d652efddc?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                    alt="model name"
-                    layout="fill"
-                    objectFit="cover"
-                    priority
-                    placeholder="blur"
-                    blurDataURL="https://images.unsplash.com/photo-1536180931879-fd2d652efddc?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                  />
-                </div> */}
-                {/* //! ini yang ke 2 */}
-                {/* {images.map((item, index) => (
+                {filteredAsset?.map((item, index) => (
                   <div
-                    className="bg-muted/50 rounded-t-xl"
+                    className="bg-muted/50 shadow-lg border border-gray-100"
                     key={index}
-                    draggable={true}
-                    onDragStart={(e) => handleDragStart(index, e)}
-                    onDrag={(e) => handleDrag(e)}
-                    onDragEnter={() => (draggedOverImage.current = index)}
-                    onDragEnd={handleSortImage}
-                    onDragOver={(e) => e.preventDefault()}
+                    // draggable={true}
+                    // onDragStart={(e) => handleDragStart_reignApi(index, e)}
+                    // onDrag={(e) => handleDrag_reignApi(e)}
+                    // onDragEnter={() =>
+                    //   (draggedOverImage_reignApi.current = index)
+                    // }
+                    // onDragEnd={handleSortImage_reignApi}
+                    // onDragOver={(e) => e.preventDefault()}
+
+                    // onDragStart={() => (dragImage_reignApi.current = index)}
+                    // onDragEnter={() =>
+                    //   (draggedOverImage_reignApi.current = index)
+                    // }
+                    // onDragEnd={handleSortImage_reignApi}
+                    // onDragOver={(e) => e.preventDefault()}
+
+                    draggable={
+                      tabsValue === "polaroid" || tabsValue === "carousel"
+                    }
+                    onDragStart={() => {
+                      if (
+                        tabsValue === "polaroid" ||
+                        tabsValue === "carousel"
+                      ) {
+                        dragImage_reignApi.current = index;
+                      }
+                    }}
+                    onDragEnter={() => {
+                      if (
+                        tabsValue === "polaroid" ||
+                        tabsValue === "carousel"
+                      ) {
+                        draggedOverImage_reignApi.current = index;
+                      }
+                    }}
+                    onDragEnd={(e) => {
+                      if (
+                        tabsValue === "polaroid" ||
+                        tabsValue === "carousel"
+                      ) {
+                        handleSortImage_reignApi(e);
+                      }
+                    }}
+                    onDragOver={(e) => {
+                      if (
+                        tabsValue === "polaroid" ||
+                        tabsValue === "carousel"
+                      ) {
+                        e.preventDefault();
+                      }
+                    }}
                   >
                     <img
-                      src={item.url}
-                      className="object-cover aspect-square rounded-t-xl"
+                      src={item.img_url}
+                      className="object-cover aspect-square p-2"
                     />
-                    <div className="flex items-center justify-between mx-1">
-                      <Badge variant="outline" className="gap-1.5">
-                        <span
-                          className="size-1.5 rounded-full bg-emerald-500"
-                          aria-hidden="true"
-                        ></span>
-                        Active
-                      </Badge>
+                    <div className="flex items-center justify-between min-h-min pb-1 mx-2">
+                      <span className="text-xs font-semibold">
+                        {item.orientation === "portrait" ? "P" : "L"}
+                      </span>
+                      <span className="text-xs font-semibold">
+                        O :{item.order}
+                      </span>
+                      <span className="text-xs font-semibold">
+                        id :{item.id}
+                      </span>
                       <DropdownMenu
-                        open={openStates[index] || false} // Open only for the specific index
+                        open={openStates[index] || false}
                         onOpenChange={(isOpen) =>
                           handleOpenChange(index, isOpen)
                         }
@@ -595,19 +1114,31 @@ export default function Page() {
                             <DropdownMenuItem onClick={() => console.log(item)}>
                               Test data
                             </DropdownMenuItem>
+                            {(tabsValue === "polaroid" ||
+                              tabsValue === "carousel") && (
+                              <DropdownMenuItem
+                                // onClick={() => console.log(item)}
+                                onClick={() =>
+                                  handleChangePhotoPosition(item, index)
+                                }
+                              >
+                                Change position
+                              </DropdownMenuItem>
+                            )}
+
                             <DropdownMenuItem
-                              onClick={() => console.log("Show")}
+                              onClick={() =>
+                                handleStatusChange(item.status, item.id)
+                              }
                             >
-                              Active
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => console.log("Hide")}
-                            >
-                              Archive
+                              {item.status === "active" ? "Archive" : "Show"}
                             </DropdownMenuItem>
 
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-red-600">
+                            <DropdownMenuItem
+                              className="text-red-600"
+                              onClick={() => handleDeleteAsset(item)}
+                            >
                               Delete
                             </DropdownMenuItem>
                           </DropdownMenuGroup>
@@ -615,115 +1146,139 @@ export default function Page() {
                       </DropdownMenu>
                     </div>
                   </div>
-                ))} */}
-                {/* //! ini yang ke 2 */}
+                ))}
+                {/* //! ini yang paling baru draggable */}
               </div>
             </div>
-            {/* //! INI OGNYA */}
-
-            {/* <div className="grid auto-rows-min gap-2 grid-cols-3 md:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10">
-              {images.map((item, index) => (
-                <div
-                  className="bg-muted/50 rounded-xl"
-                  key={index}
-                  draggable={true}
-                  onDragStart={() => (dragImage.current = index)}
-                  onDragEnter={() => (draggedOverImage.current = index)}
-                  onDragEnd={handleSortImage}
-                  onDragOver={(e) => e.preventDefault()}
-                >
-                  <img
-                    src={item.url}
-                    className="object-cover aspect-square rounded-xl"
-                  />
-                </div>
-              ))}
-            </div> */}
-            {/* //! INI OGNYA */}
-          </TabsContent>
-          <TabsContent value="polaroids">
-            List polaroids photos.
-            <div className="grid w-full max-w-sm items-center gap-1.5">
-              <Label htmlFor="picture">Picture</Label>
-              <Input
-                id="picture"
-                type="file"
-                className="aspect-square bg-blue-300"
-              />
-            </div>
-          </TabsContent>
-          <TabsContent value="archive-carousel">
-            List archive carousel.
-          </TabsContent>
-          <TabsContent value="archive-polaroids">
-            List archive polaroids.
           </TabsContent>
         </Tabs>
       </div>
+
       {/* //! add carousel photos */}
-      <Sheet open={carouselSheet} onOpenChange={setCarouselSheet}>
-        <SheetContent>
+      <Sheet open={assetSheet} onOpenChange={handleAssetsSheetChange}>
+        <SheetContent className="md:max-w-full ">
           <SheetHeader>
-            <SheetTitle>Carousel</SheetTitle>
+            <SheetTitle className="first-letter:uppercase">
+              {tabsValue}
+            </SheetTitle>
           </SheetHeader>
+          <SheetDescription>
+            The uploaded photo must not exceed 10MB in size. Larger files will
+            not be accepted.
+            <br />
+            {isExeeded && (
+              <span className="text-red-500">
+                Some photos exceed the maximum allowed size of 10MB. Please
+                reduce the file size or choose a different image.
+              </span>
+            )}
+          </SheetDescription>
+
           <form
             onSubmit={handleSubmitAssets}
-            className="overflow-auto max-h-[100vh] pb-52"
+            className="overflow-y-auto max-h-[100vh] pb-52"
           >
-            <div className="grid gap-4 grid-cols-3 py-4 px-2">
-              <div className="col-span-3">
+            <div className="grid grid-cols-2 gap-4 py-4 px-2">
+              {/* Portrait Section */}
+              <div>
                 <Label
-                  htmlFor="picture"
-                  className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                  htmlFor="portrait"
+                  className="block mb-2 text-sm font-medium"
                 >
-                  Select photos ({selectedPhotos.length} selected)
+                  Portrait ({selectedPhotosPortrait.length})
                 </Label>
                 <Input
-                  id="picture"
+                  id="portrait"
                   type="file"
                   accept="image/*"
                   multiple
-                  onChange={handlePhotoSelection}
-                  className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
+                  onChange={handlePhotoSelectionPortrait}
+                  className="block w-full text-sm border rounded-lg cursor-pointer"
                 />
-              </div>
-              <Separator className="col-span-3" />
-
-              {selectedPhotos.length > 0 && (
-                <div className="col-span-3 grid grid-cols-3 gap-4">
-                  {selectedPhotos.map((photo, index) => (
-                    <div
-                      key={index}
-                      className="relative bg-muted/50 rounded-xl"
-                    >
-                      <div className="absolute -top-2 -right-2">
+                {selectedPhotosPortrait.length > 0 && (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                    {selectedPhotosPortrait.map((photo, index) => (
+                      <div key={index} className="relative rounded-sm border">
                         <Button
                           size="icon"
                           variant="destructive"
-                          className="rounded-full w-6 h-6"
-                          onClick={() => handleDeletePhoto(index)}
+                          className="absolute -top-2 -right-2 rounded-full w-6 h-6"
+                          onClick={() => handleDeletePhotoPortrait(index)}
                         >
                           <X />
                         </Button>
+                        <img
+                          src={photo.preview}
+                          alt={`Preview ${index + 1}`}
+                          className={`object-cover aspect-[3/4] rounded-sm ${
+                            photo?.file?.size > 10000000
+                              ? "border-red-500 border-2"
+                              : "border-none"
+                          }`}
+                        />
                       </div>
+                    ))}
+                  </div>
+                )}
+              </div>
 
-                      <img
-                        src={photo.preview}
-                        alt={`Preview ${index + 1}`}
-                        className="object-cover aspect-square rounded-xl"
-                      />
-                    </div>
-                  ))}
-                </div>
-              )}
+              {/* Landscape Section */}
+              <div>
+                <Label
+                  htmlFor="landscape"
+                  className="block mb-2 text-sm font-medium"
+                >
+                  Landscape ({selectedPhotosLandscape.length})
+                </Label>
+                <Input
+                  id="landscape"
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handlePhotoSelectionLandscape}
+                  className="block w-full text-sm border rounded-lg cursor-pointer"
+                />
+                {selectedPhotosLandscape.length > 0 && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    {selectedPhotosLandscape.map((photo, index) => (
+                      <div
+                        key={index}
+                        className="relative bg-muted/50 rounded-sm"
+                      >
+                        <Button
+                          size="icon"
+                          variant="destructive"
+                          className="absolute -top-2 -right-2 rounded-full w-6 h-6"
+                          onClick={() => handleDeletePhotoLandscape(index)}
+                        >
+                          <X />
+                        </Button>
+                        <img
+                          src={photo.preview}
+                          alt={`Preview ${index + 1}`}
+                          className={`object-cover aspect-video rounded-sm ${
+                            photo?.file?.size > 10000000
+                              ? "border-red-500 border-2"
+                              : "border-none"
+                          }`}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
+            Uploaded: {uploadCount} /{" "}
+            {selectedPhotosPortrait.length + selectedPhotosLandscape.length}
             <SheetFooter>
-              <Button type="submit">Save photos</Button>
+              {!isExeeded && <Button type="submit">Save photos</Button>}
             </SheetFooter>
           </form>
         </SheetContent>
       </Sheet>
       {/* //! add carousel photos */}
+
+      {/* //! dialog change photo position */}
       <Dialog open={changeOrderDialog} onOpenChange={setChangeOrderDialog}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -739,7 +1294,7 @@ export default function Page() {
                 </Label>
                 <Input
                   id="currentPosition"
-                  value={currentImagePosition}
+                  value={currentImagePosition.currenctOrder}
                   disabled
                   className="col-span-3"
                 />
@@ -758,7 +1313,14 @@ export default function Page() {
                   </SelectTrigger>
                   <SelectContent>
                     {photoPositionOptions.map((item, index) => (
-                      <SelectItem value={item.value} key={index}>
+                      <SelectItem
+                        value={item.value}
+                        key={index}
+                        disabled={
+                          Number(item.value) ===
+                          Number(currentImagePosition.currenctOrder)
+                        }
+                      >
                         {item.value}
                       </SelectItem>
                     ))}
@@ -773,6 +1335,34 @@ export default function Page() {
           </form>
         </DialogContent>
       </Dialog>
+      {/* //! dialog change photo position */}
+
+      {/* //! Dialog delete model */}
+      <AlertDialog open={deleteDialogAsset} onOpenChange={setDeleteDialogAsset}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete your
+              model and remove your model data from the server.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+
+            <Button
+              variant="destructive"
+              type="button"
+              disabled={loading}
+              onClick={deleteAsset}
+            >
+              {loading && <Loader2 className="animate-spin" />}
+              Delete
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      {/* //! Dialog delete model */}
     </SidebarInset>
   );
 }

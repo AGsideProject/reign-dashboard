@@ -93,7 +93,7 @@ import Image from "next/image";
 import reignLogo from "@/public/images/reignLogo.jpg";
 
 const accToken =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3ODM4NGUzLTY4OTAtODAwMy05YTNiLThjNjBjMmEyMTA1YSIsImVtYWlsIjoiYWxkb21hcmNlbGlubzAxQGdtYWlsLmNvbSIsImlhdCI6MTczNzg4OTM5NSwiZXhwIjoxNzM3ODkyOTk1fQ.xEz9FBR3r5a2ZZw2E-a5g3-g2rIQ1HSb062Y9M6NEmA";
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjcwYjY2OWYyLWYyZjAtNDBhMi1iZTA3LTBjNzVhNWM1ZjgxYiIsImVtYWlsIjoiYWxkb21hcmNlbGlubzAxQGdtYWlsLmNvbSIsImlhdCI6MTczODIzOTQ2MywiZXhwIjoxNzM4MjQzMDYzfQ.EBOxBiLNDtgyzvvjuKmdxpPlkRQlQHDgK-0sNgaVfXA";
 
 const url = "https://reign-service.onrender.com";
 
