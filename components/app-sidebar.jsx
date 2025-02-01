@@ -3,8 +3,10 @@
 import * as React from "react";
 import {
   AudioWaveform,
+  BookIcon,
   BookOpen,
   Bot,
+  Calendar,
   Command,
   Frame,
   GalleryVerticalEnd,
@@ -15,6 +17,7 @@ import {
   Settings2,
   SquareTerminal,
   User,
+  User2,
 } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
@@ -157,16 +160,16 @@ const data = {
       url: "/models",
       icon: User,
     },
-    // {
-    //   name: "Sales & Marketing",
-    //   url: "#",
-    //   icon: PieChart,
-    // },
-    // {
-    //   name: "Travel",
-    //   url: "#",
-    //   icon: Map,
-    // },
+    {
+      name: "Booking",
+      url: "/booking",
+      icon: Calendar,
+    },
+    {
+      name: "Users",
+      url: "/user",
+      icon: User2,
+    },
   ],
 };
 

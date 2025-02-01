@@ -91,13 +91,16 @@ import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
 import reignLogo from "@/public/images/reignLogo.jpg";
+import fetchGlobal from "@/lib/fetch-data";
+import useDeviceType from "@/hooks/use-device";
 
 const accToken =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjcwYjY2OWYyLWYyZjAtNDBhMi1iZTA3LTBjNzVhNWM1ZjgxYiIsImVtYWlsIjoiYWxkb21hcmNlbGlubzAxQGdtYWlsLmNvbSIsImlhdCI6MTczODIzOTQ2MywiZXhwIjoxNzM4MjQzMDYzfQ.EBOxBiLNDtgyzvvjuKmdxpPlkRQlQHDgK-0sNgaVfXA";
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjcwYjY2OWYyLWYyZjAtNDBhMi1iZTA3LTBjNzVhNWM1ZjgxYiIsImVtYWlsIjoiYWxkb21hcmNlbGlubzAxQGdtYWlsLmNvbSIsImlhdCI6MTczODI0OTQ5NSwiZXhwIjoxNzM4MjUzMDk1fQ.f2qFE-QvOjI9jbiEjLlZq0YeDBj9YRlx42g7JAsXN5I";
 
 const url = "https://reign-service.onrender.com";
 
 export default function Page() {
+  const device = useDeviceType();
   const { toast } = useToast();
   const router = useRouter();
   const initialAssets = {
@@ -139,12 +142,16 @@ export default function Page() {
   };
 
   const [formData, setFormData] = useState(initialForm);
+
+  //! untuk handle sheet model
   const handleSheetChange = (isOpen) => {
     setModelSheet(isOpen);
     if (!isOpen) {
       setFormData(initialForm);
     }
   };
+
+  //! untuk handle form
   const handleChange = (e) => {
     const { id, value, type, files } = e.target || {};
 
@@ -159,6 +166,7 @@ export default function Page() {
     }
   };
 
+  //! untuk handle gender change
   const handleGenderChange = (value) => {
     setFormData((prevData) => ({
       ...prevData,
@@ -166,6 +174,7 @@ export default function Page() {
     }));
   };
 
+  //! untuk handle post add / update ke db
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -192,22 +201,34 @@ export default function Page() {
 
         console.log(_formData, "< _formData");
 
-        const response = await fetch(
-          `https://reign-service.onrender.com/v1/model/admin/${id}`,
+        const dataGlobal = await fetchGlobal(
+          `/v1/model/admin/${id}`,
           {
             method: "PUT",
-            headers: {
-              Authorization: `Bearer ${accToken}`,
-            },
             body: _formData,
-          }
+            contentType: "form-data",
+          },
+          true
         );
 
-        console.log(response, "< res");
+        console.log(dataGlobal, "< dataGlobal");
 
-        if (!response.ok) {
-          throw new Error(`Error: ${response.statusText}`);
-        }
+        // const response = await fetch(
+        //   `https://reign-service.onrender.com/v1/model/admin/${id}`,
+        //   {
+        //     method: "PUT",
+        //     headers: {
+        //       Authorization: `Bearer ${accToken}`,
+        //     },
+        //     body: _formData,
+        //   }
+        // );
+
+        // console.log(response, "< res");
+
+        // if (!response.ok) {
+        //   throw new Error(`Error: ${response.statusText}`);
+        // }
 
         toast({
           title: "Strike a Pose! 📸",
@@ -223,6 +244,16 @@ export default function Page() {
       } catch (error) {
         console.error("Error saving changes", error);
         // toast.error("Failed to save changes. Please try again.");
+        setLoading(false);
+        fetchReignModels();
+        setFormData(initialForm);
+        setModelSheet(false);
+        toast({
+          title: "Wardrobe Malfunction! 🚨",
+          description:
+            "Oops! Looks like the fashion police rejected this one. Try again!",
+          variant: "destructive",
+        });
       }
     } else {
       console.log("add");
@@ -246,26 +277,37 @@ export default function Page() {
 
         console.log(_formData, "< _formData");
 
-        const response = await fetch(
-          "https://reign-service.onrender.com/v1/model/admin",
+        const dataGlobal = await fetchGlobal(
+          "/v1/model/admin",
           {
             method: "POST",
-            headers: {
-              Authorization: `Bearer ${accToken}`,
-            },
             body: _formData,
-          }
+            contentType: "form-data",
+          },
+          true
         );
 
-        console.log(response, "< res");
+        console.log(dataGlobal, "< dataGlobal");
+        // const response = await fetch(
+        //   "https://reign-service.onrender.com/v1/model/admin",
+        //   {
+        //     method: "POST",
+        //     headers: {
+        //       Authorization: `Bearer ${accToken}`,
+        //     },
+        //     body: _formData,
+        //   }
+        // );
 
-        if (!response.ok) {
-          throw new Error(`Error: ${response.statusText}`);
-        }
+        // console.log(response, "< res");
+
+        // if (!response.ok) {
+        //   throw new Error(`Error: ${response.statusText}`);
+        // }
 
         toast({
           title: "Strike a Pose! 📸",
-          description: "Added successfully! Time to strike a pose!",
+          description: "Added successfull! Time to strike a pose!",
           variant: "default", // You can use "destructive" for error messages
           className: "bg-emerald-50 text-black",
         });
@@ -291,31 +333,43 @@ export default function Page() {
     }
   };
 
+  //! untuk handle model status
   const handleStatusChange = async (status, id) => {
     console.log(status, id);
     let newStatus = status === "active" ? "inactive" : "active";
 
     try {
-      const _formBody = new URLSearchParams();
-      _formBody.append("status", newStatus);
+      // const _formBody = new URLSearchParams();
+      // _formBody.append("status", newStatus);
 
-      const response = await fetch(
-        `https://reign-service.onrender.com/v1/model/admin/${id}/status`,
+      const dataGlobal = await fetchGlobal(
+        `/v1/model/admin/${id}/status`,
         {
           method: "PATCH",
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            Authorization: `Bearer ${accToken}`,
-          },
-          body: _formBody.toString(), // Correctly formatted body
-        }
+          body: JSON.stringify({ status: newStatus }),
+        },
+        true
       );
 
-      console.log(response, "< res");
+      console.log(dataGlobal, "< dataGlobal");
 
-      if (!response.ok) {
-        throw new Error(`Error: ${response.statusText}`);
-      }
+      // const response = await fetch(
+      //   `https://reign-service.onrender.com/v1/model/admin/${id}/status`,
+      //   {
+      //     method: "PATCH",
+      //     headers: {
+      //       "Content-Type": "application/x-www-form-urlencoded",
+      //       Authorization: `Bearer ${accToken}`,
+      //     },
+      //     body: _formBody.toString(), // Correctly formatted body
+      //   }
+      // );
+
+      // console.log(response, "< res");
+
+      // if (!response.ok) {
+      //   throw new Error(`Error: ${response.statusText}`);
+      // }
 
       toast({
         title:
@@ -328,9 +382,6 @@ export default function Page() {
             : "Poof! This model is now hidden from the public eye.",
         variant: "default",
       });
-
-      fetchReignModels();
-      setFormData(initialForm);
     } catch (error) {
       console.error("Error saving changes", error);
 
@@ -341,69 +392,57 @@ export default function Page() {
         variant: "destructive",
       });
 
-      fetchReignModels();
-      setFormData(initialForm);
+      // fetchReignModels();
+      // setFormData(initialForm);
     }
+    fetchReignModels();
+    setFormData(initialForm);
   };
 
+  //! untuk handle fetch all model
   const fetchReignModels = async () => {
+    setLoading(true);
     try {
-      const response = await fetch(
-        "https://reign-service.onrender.com/v1/model/admin/list",
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE",
-            "Access-Control-Allow-Headers": "Content-Type, Authorization",
-            Authorization: `Bearer ${accToken}`,
-          },
-        }
-      );
-      const data = await response.json();
-      setModelList(data.data);
-      console.log(data, "< models reign data");
+      const dataGLobal = await fetchGlobal("/v1/model/admin/list");
+
+      // console.log(dataGLobal, "< dataGlobal");
+
+      // const response = await fetch(
+      //   "https://reign-service.onrender.com/v1/model/admin/list",
+      //   {
+      //     method: "GET",
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //       Accept: "application/json",
+      //       "Access-Control-Allow-Origin": "*",
+      //       "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE",
+      //       "Access-Control-Allow-Headers": "Content-Type, Authorization",
+      //       Authorization: `Bearer ${accToken}`,
+      //     },
+      //   }
+      // );
+      // const data = await response.json();
+      // setModelList(data.data);
+      // console.log(data, "< models reign data");
+      setModelList(dataGLobal);
+      setLoading(false);
     } catch (error) {
-      console.log(error);
+      console.log(error, "<error");
+      toast({
+        title: "Models Are Playing Hide and Seek 🏃",
+        description:
+          "We tried to fetch them, but they’re REALLY good at hiding. If you see them, tell them to come back to work!",
+        variant: "destructive",
+      });
+      setLoading(false);
     }
   };
-
-  function getData() {
-    // Fetch data from your API here.
-    return setData(
-      new Array(10).fill(null).map((item, index) => ({
-        id: index + 1,
-        FirstName: "First name",
-        LastName: "Last name",
-        ShowcaseName: "Showcase name",
-        DateOfBirth: "Date of birth",
-        Height: "Height",
-        BustChest: "BustChest",
-        Waist: "Waist",
-        Hips: "Hips",
-        Shoes: "Shoes",
-        Eyes: "Eyes",
-        Hair: "Hair",
-        Piercings: "Piercings",
-        BraSize: "BraSize",
-        SuitSize: "SuitSize",
-        DressSize: "DressSize",
-        Ethnicity: "Ethnicity",
-        // height: "162cm",
-        // amount: Math.random() * 1000,
-        // status: "pending",
-        // email: `${Math.random().toString(36).substring(2, 10)}@example.com`,
-      }))
-    );
-  }
 
   useEffect(() => {
-    getData();
     fetchReignModels();
   }, []);
 
+  //! untuk handle edit model, aktif saat image di pencet
   const handleEditModel = (model) => {
     const dataEdit = {
       id: model.id,
@@ -424,40 +463,53 @@ export default function Page() {
     setModelSheet(true);
   };
 
+  //! untuk handle add model
   const handleAddModel = () => {
     setFormData(initialForm);
     setModelSheet(true);
     setPreviewCoverImage(null);
   };
 
+  //! untuk handle delete model
   const handleDeleteModel = (model) => {
     setDeleteDialog(true);
     setFormData({ ...model });
   };
 
+  //! untuk handle delete ke db
   const deleteModel = async () => {
     try {
       setLoading(true);
       const id = formData.id;
-      const response = await fetch(`${url}/v1/model/admin/${id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${accToken}`,
+
+      const dataGlobal = await fetchGlobal(
+        `/v1/model/admin/${id}`,
+        {
+          method: "DELETE",
         },
-      });
+        true
+      );
 
-      if (!response.ok) {
-        throw new Error(`Error: ${response.statusText}`);
-      }
+      console.log(dataGlobal, "<dataGlobal delete");
+      // const response = await fetch(`${url}/v1/model/admin/${id}`, {
+      //   method: "DELETE",
+      //   headers: {
+      //     Authorization: `Bearer ${accToken}`,
+      //   },
+      // });
 
-      const data = await response.json();
-      console.log(data, "< data");
+      // if (!response.ok) {
+      //   throw new Error(`Error: ${response.statusText}`);
+      // }
+
+      // const data = await response.json();
+      // console.log(data, "< data");
       toast({
         title: "Buh-Bye! 👋",
         description:
           "That model's off to the digital afterlife. We'll miss you! 💔",
         variant: "default", // You can use "destructive" for error messages
-        className: "bg-emerald-50 text-black",
+        className: "bg-emerald-100 text-black",
       });
       setLoading(false);
       fetchReignModels();
@@ -465,6 +517,16 @@ export default function Page() {
       setFormData(initialForm);
     } catch (error) {
       console.error("Error deleting model:", error);
+
+      toast({
+        title: "Model Says NOPE! 🚫",
+        description:
+          "We tried deleting it, but it fought back. This one's got a survival instinct! Try again?",
+        variant: "destructive",
+      });
+      setLoading(false);
+      setDeleteDialog(false);
+      setFormData(initialForm);
     }
   };
 
@@ -528,90 +590,16 @@ export default function Page() {
               Female
             </TabsTrigger>
           </TabsList>
-          <TabsContent value="static">
-            <div
-              className="grid grid-cols-2 p-2 gap-5 md:grid-cols-3 md:p-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-9"
-              // className="grid grid-flow-col auto-cols-max md:auto-cols-min"
-            >
-              {/* //! CARD COMPONENT */}
-              <div className="bg-white shadow-lg border border-gray-50 aspect-[3/4.5] flex flex-col justify-between gap-0">
-                <div>
-                  {/* //! MODEL IMAGE */}
-                  <div
-                    className="p-2 md:p-3 cursor-pointer"
-                    onClick={handleEditModel}
-                  >
-                    <img
-                      className="aspect-square object-cover"
-                      src="https://images.unsplash.com/photo-1574015974293-817f0ebebb74?q=80&w=2080&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                      alt=""
-                    />
-                  </div>
-                  {/* //! MODEL IMAGE */}
-                  <div className="flex justify-center">
-                    <p className="text-xs sm:text-sm xl:text-base">Static</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between mx-2 mb-1">
-                  {/* <div className="bg-green-700 rounded-full h-2 w-2"></div> */}
-                  <Badge variant="outline" className="gap-1.5">
-                    <span
-                      className="size-1.5 rounded-full bg-emerald-500"
-                      aria-hidden="true"
-                    ></span>
-                    Active
-                  </Badge>
-                  {/* <Badge variant="outline">Active</Badge> */}
-                  <DropdownMenu
-                  // open={openDropDownCard[index] || false}
-                  // onOpenChange={(isOpen) =>
-                  //   handleOpenChangeDropDown(index, isOpen)
-                  // }
-                  >
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm">
-                        <MoreHorizontal />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-[200px]">
-                      <DropdownMenuLabel>Options</DropdownMenuLabel>
-                      <DropdownMenuGroup>
-                        <DropdownMenuItem
-                          // onClick={() => setAssetsSheet(true)}
-                          onClick={() =>
-                            router.push("/models/assets?model=test")
-                          }
-                        >
-                          Assets
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => console.log("Show")}>
-                          Show
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => console.log("Hide")}>
-                          Hide
-                        </DropdownMenuItem>
-
-                        {/* <DropdownMenuItem>Set due date...</DropdownMenuItem> */}
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          className="text-red-600"
-                          onClick={() => setDeleteDialog(true)}
-                        >
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuGroup>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </div>
-              {/* //! CARD COMPONENT */}
-            </div>
-          </TabsContent>
 
           <TabsContent value={tabsValue}>
-            <div className="grid grid-cols-2 p-2 gap-5 md:grid-cols-3 md:p-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-9">
-              {filteredModels.map((model, index) => (
+            {loading && <p>LOADING</p>}
+
+            <div
+              className={`grid ${
+                device === "mobile" ? "grid-cols-2" : "grid-cols-3"
+              } p-2 gap-5 md:grid-cols-3 md:p-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-9`}
+            >
+              {filteredModels?.map((model, index) => (
                 <div
                   className="bg-white shadow-lg border border-gray-50 aspect-[3/4.5] flex flex-col justify-between gap-0"
                   key={index}
@@ -933,9 +921,14 @@ export default function Page() {
             {/* <AlertDialogAction type="button" onClick={() => deleteModel()}>
               Continue
             </AlertDialogAction> */}
-            <Button type="button" disabled={loading} onClick={deleteModel}>
+            <Button
+              type="button"
+              disabled={loading}
+              onClick={deleteModel}
+              variant="destructive"
+            >
               {loading && <Loader2 className="animate-spin" />}
-              Save changes
+              DELETE
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
