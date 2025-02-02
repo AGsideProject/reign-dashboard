@@ -3,28 +3,14 @@
 import {
   Breadcrumb,
   BreadcrumbItem,
-  BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
-  BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
-import // DropdownMenu,
-// DropdownMenuContent,
-// DropdownMenuItem,
-// DropdownMenuSeparator,
-// DropdownMenuTrigger,
-"@/components/ui/dropdown-menu";
-import { columns } from "./columns";
-import { DataTable } from "./dataTable";
-import { use, useEffect, useState } from "react";
+import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
+
+import { useEffect, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-// import { useToast } from "@/components/ui/use-toast";
 
 import {
   Sheet,
@@ -32,16 +18,19 @@ import {
   SheetDescription,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
   SheetFooter,
-  SheetClose,
 } from "@/components/ui/sheet";
 
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { Loader2, MoreHorizontal } from "lucide-react";
+import {
+  BookDashed,
+  FileImage,
+  Glasses,
+  Loader2,
+  MoreHorizontal,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -49,41 +38,25 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
 
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
 
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
 import { Badge } from "@/components/ui/badge";
@@ -94,42 +67,24 @@ import reignLogo from "@/public/images/reignLogo.jpg";
 import fetchGlobal from "@/lib/fetch-data";
 import useDeviceType from "@/hooks/use-device";
 
-const accToken =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjcwYjY2OWYyLWYyZjAtNDBhMi1iZTA3LTBjNzVhNWM1ZjgxYiIsImVtYWlsIjoiYWxkb21hcmNlbGlubzAxQGdtYWlsLmNvbSIsImlhdCI6MTczODI0OTQ5NSwiZXhwIjoxNzM4MjUzMDk1fQ.f2qFE-QvOjI9jbiEjLlZq0YeDBj9YRlx42g7JAsXN5I";
-
-const url = "https://reign-service.onrender.com";
-
 export default function Page() {
   const device = useDeviceType();
   const { toast } = useToast();
   const router = useRouter();
-  const initialAssets = {
-    image_file: null,
-    type: null,
-    order: null,
-    model_id: null,
-  };
+
   const [tabsValue, setTabsValue] = useState("all");
-  const [assets, setAssets] = useState([]);
-  const [data, setData] = useState([]);
   const [modelSheet, setModelSheet] = useState(false);
-  const [assetsSheet, setAssetsSheet] = useState(false);
   const [deleteDialog, setDeleteDialog] = useState(false);
   const [previewCoverImage, setPreviewCoverImage] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [openDropDownCard, setOpenDropDownCard] = useState(false);
-  const handleOpenChangeDropDown = (index, isOpen) => {
-    setOpenDropDownCard((prev) => ({
-      ...prev,
-      [index]: isOpen,
-    }));
-  };
-  const [modelList, setModelList] = useState([]);
+
+  const [modelList, setModelList] = useState();
 
   const initialForm = {
     id: "",
     name: "",
     slug: "",
+    ig_username: "",
     height: "",
     bust: "",
     waist: "",
@@ -188,6 +143,7 @@ export default function Page() {
         _formData.append("name", formData.name);
         _formData.append("slug", formData.slug);
         _formData.append("bust", formData.bust);
+        _formData.append("ig_username", formData.ig_username);
         _formData.append("hight", formData.height);
         _formData.append("waist", formData.waist);
         _formData.append("hips", formData.hips);
@@ -211,29 +167,10 @@ export default function Page() {
           true
         );
 
-        console.log(dataGlobal, "< dataGlobal");
-
-        // const response = await fetch(
-        //   `https://reign-service.onrender.com/v1/model/admin/${id}`,
-        //   {
-        //     method: "PUT",
-        //     headers: {
-        //       Authorization: `Bearer ${accToken}`,
-        //     },
-        //     body: _formData,
-        //   }
-        // );
-
-        // console.log(response, "< res");
-
-        // if (!response.ok) {
-        //   throw new Error(`Error: ${response.statusText}`);
-        // }
-
         toast({
           title: "Strike a Pose! 📸",
           description: "Update successfull! Time to strike a pose!",
-          variant: "default", // You can use "destructive" for error messages
+          variant: "default",
           className: "bg-emerald-50 text-black",
         });
 
@@ -243,7 +180,6 @@ export default function Page() {
         setModelSheet(false);
       } catch (error) {
         console.error("Error saving changes", error);
-        // toast.error("Failed to save changes. Please try again.");
         setLoading(false);
         fetchReignModels();
         setFormData(initialForm);
@@ -263,6 +199,7 @@ export default function Page() {
         const _formData = new FormData();
         _formData.append("name", formData.name);
         _formData.append("slug", formData.slug);
+        _formData.append("ig_username", formData.ig_username);
         _formData.append("bust", formData.bust);
         _formData.append("hight", formData.height);
         _formData.append("waist", formData.waist);
@@ -288,27 +225,11 @@ export default function Page() {
         );
 
         console.log(dataGlobal, "< dataGlobal");
-        // const response = await fetch(
-        //   "https://reign-service.onrender.com/v1/model/admin",
-        //   {
-        //     method: "POST",
-        //     headers: {
-        //       Authorization: `Bearer ${accToken}`,
-        //     },
-        //     body: _formData,
-        //   }
-        // );
-
-        // console.log(response, "< res");
-
-        // if (!response.ok) {
-        //   throw new Error(`Error: ${response.statusText}`);
-        // }
 
         toast({
           title: "Strike a Pose! 📸",
           description: "Added successfull! Time to strike a pose!",
-          variant: "default", // You can use "destructive" for error messages
+          variant: "default",
           className: "bg-emerald-50 text-black",
         });
 
@@ -318,7 +239,6 @@ export default function Page() {
         setModelSheet(false);
       } catch (error) {
         console.error("Error saving changes", error);
-        // toast.error("Failed to save changes. Please try again.");
         setLoading(false);
         fetchReignModels();
         setFormData(initialForm);
@@ -339,10 +259,7 @@ export default function Page() {
     let newStatus = status === "active" ? "inactive" : "active";
 
     try {
-      // const _formBody = new URLSearchParams();
-      // _formBody.append("status", newStatus);
-
-      const dataGlobal = await fetchGlobal(
+      await fetchGlobal(
         `/v1/model/admin/${id}/status`,
         {
           method: "PATCH",
@@ -350,26 +267,6 @@ export default function Page() {
         },
         true
       );
-
-      console.log(dataGlobal, "< dataGlobal");
-
-      // const response = await fetch(
-      //   `https://reign-service.onrender.com/v1/model/admin/${id}/status`,
-      //   {
-      //     method: "PATCH",
-      //     headers: {
-      //       "Content-Type": "application/x-www-form-urlencoded",
-      //       Authorization: `Bearer ${accToken}`,
-      //     },
-      //     body: _formBody.toString(), // Correctly formatted body
-      //   }
-      // );
-
-      // console.log(response, "< res");
-
-      // if (!response.ok) {
-      //   throw new Error(`Error: ${response.statusText}`);
-      // }
 
       toast({
         title:
@@ -391,9 +288,6 @@ export default function Page() {
           "Oops! Looks like the fashion police rejected this one. Try again!",
         variant: "destructive",
       });
-
-      // fetchReignModels();
-      // setFormData(initialForm);
     }
     fetchReignModels();
     setFormData(initialForm);
@@ -405,29 +299,9 @@ export default function Page() {
     try {
       const dataGLobal = await fetchGlobal("/v1/model/admin/list");
 
-      // console.log(dataGLobal, "< dataGlobal");
-
-      // const response = await fetch(
-      //   "https://reign-service.onrender.com/v1/model/admin/list",
-      //   {
-      //     method: "GET",
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //       Accept: "application/json",
-      //       "Access-Control-Allow-Origin": "*",
-      //       "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE",
-      //       "Access-Control-Allow-Headers": "Content-Type, Authorization",
-      //       Authorization: `Bearer ${accToken}`,
-      //     },
-      //   }
-      // );
-      // const data = await response.json();
-      // setModelList(data.data);
-      // console.log(data, "< models reign data");
       setModelList(dataGLobal);
       setLoading(false);
     } catch (error) {
-      console.log(error, "<error");
       toast({
         title: "Models Are Playing Hide and Seek 🏃",
         description:
@@ -448,6 +322,7 @@ export default function Page() {
       id: model.id,
       name: model.name || "no data",
       slug: model.slug || "no data",
+      ig_username: model.ig_username || "no data",
       height: model.hight || 0,
       bust: model.bust || 0,
       waist: model.waist || 0,
@@ -482,7 +357,7 @@ export default function Page() {
       setLoading(true);
       const id = formData.id;
 
-      const dataGlobal = await fetchGlobal(
+      await fetchGlobal(
         `/v1/model/admin/${id}`,
         {
           method: "DELETE",
@@ -490,25 +365,11 @@ export default function Page() {
         true
       );
 
-      console.log(dataGlobal, "<dataGlobal delete");
-      // const response = await fetch(`${url}/v1/model/admin/${id}`, {
-      //   method: "DELETE",
-      //   headers: {
-      //     Authorization: `Bearer ${accToken}`,
-      //   },
-      // });
-
-      // if (!response.ok) {
-      //   throw new Error(`Error: ${response.statusText}`);
-      // }
-
-      // const data = await response.json();
-      // console.log(data, "< data");
       toast({
         title: "Buh-Bye! 👋",
         description:
           "That model's off to the digital afterlife. We'll miss you! 💔",
-        variant: "default", // You can use "destructive" for error messages
+        variant: "default",
         className: "bg-emerald-100 text-black",
       });
       setLoading(false);
@@ -516,8 +377,6 @@ export default function Page() {
       setDeleteDialog(false);
       setFormData(initialForm);
     } catch (error) {
-      console.error("Error deleting model:", error);
-
       toast({
         title: "Model Says NOPE! 🚫",
         description:
@@ -530,13 +389,6 @@ export default function Page() {
     }
   };
 
-  console.log(formData, "< formData");
-  // useEffect(() => {
-  //   console.log(tabsValue, "keganti");
-  //   const filterData = modelList.filter((item) => item.gender === tabsValue);
-  //   setModelList(filterData);
-  // }, [tabsValue]);
-
   const [filteredModels, setFilteredModels] = useState(modelList);
 
   useEffect(() => {
@@ -547,7 +399,8 @@ export default function Page() {
     } else {
       setFilteredModels(modelList.filter((item) => item.gender === tabsValue));
     }
-  }, [tabsValue, modelList]); // Include modelList in dependencies
+  }, [tabsValue, modelList]);
+
   return (
     <SidebarInset>
       <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
@@ -592,7 +445,29 @@ export default function Page() {
           </TabsList>
 
           <TabsContent value={tabsValue}>
-            {loading && <p>LOADING</p>}
+            {loading && (
+              <div
+                className={`grid ${
+                  device === "mobile" ? "grid-cols-2" : "grid-cols-3"
+                } p-2 gap-5 md:grid-cols-3 md:p-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-9`}
+              >
+                {[...Array(5)].map((_, index) => (
+                  <div
+                    key={`loading-${index}`}
+                    className="flex items-center justify-center aspect-[3/4.5] bg-gray-300 rounded-sm lg:w-[209px] lg:h-[314px] dark:bg-gray-700"
+                  >
+                    <FileImage color="grey" size="25px" />
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {!loading && filteredModels && !filteredModels.length && (
+              <div className="text-center flex w-full justify-center gap-2 items-center h-[50vh]">
+                <Glasses color="gray" size={19} />
+                <p className="text-gray-500">No models data</p>{" "}
+              </div>
+            )}
 
             <div
               className={`grid ${
@@ -663,7 +538,9 @@ export default function Page() {
                           <DropdownMenuItem
                             onClick={() =>
                               router.push(
-                                `/models/assets?model=${model.slug}&id=${model.id}`
+                                `/models/assets?model=${model.slug}&id=${
+                                  model.id
+                                }&ig_username=${model.ig_username || ""}`
                               )
                             }
                           >
@@ -710,13 +587,14 @@ export default function Page() {
             onSubmit={handleSubmit}
             className="overflow-auto max-h-[100vh] pb-52"
           >
-            <div className="grid gap-4 grid-cols-2 py-4">
+            <div className="grid gap-4 grid-cols-2 py-4 px-[1px]">
               <div>
                 <Label htmlFor="name" className="text-left">
                   Name
                 </Label>
                 <Input
                   id="name"
+                  placeholder="Jane Doe"
                   value={formData.name}
                   onChange={handleChange}
                   className="col-span-3"
@@ -728,7 +606,20 @@ export default function Page() {
                 </Label>
                 <Input
                   id="slug"
+                  placeholder="jane-doe"
                   value={formData.slug}
+                  onChange={handleChange}
+                  className="col-span-3"
+                />
+              </div>
+              <div>
+                <Label htmlFor="name" className="text-left">
+                  Instagram
+                </Label>
+                <Input
+                  id="ig_username"
+                  placeholder="janedoe"
+                  value={formData.ig_username}
                   onChange={handleChange}
                   className="col-span-3"
                 />
@@ -739,6 +630,7 @@ export default function Page() {
                 </Label>
                 <Input
                   id="height"
+                  placeholder="175"
                   value={formData.height}
                   onChange={handleChange}
                   className="col-span-3"
@@ -751,6 +643,7 @@ export default function Page() {
                 </Label>
                 <Input
                   id="bust"
+                  placeholder="85"
                   value={formData.bust}
                   onChange={handleChange}
                   className="col-span-3"
@@ -764,6 +657,7 @@ export default function Page() {
                 <Input
                   id="waist"
                   value={formData.waist}
+                  placeholder="60"
                   onChange={handleChange}
                   className="col-span-3"
                   type="number"
@@ -775,6 +669,7 @@ export default function Page() {
                 </Label>
                 <Input
                   id="hips"
+                  placeholder="90"
                   value={formData.hips}
                   onChange={handleChange}
                   className="col-span-3"
@@ -787,6 +682,7 @@ export default function Page() {
                 </Label>
                 <Input
                   id="shoeSize"
+                  placeholder="39"
                   value={formData.shoeSize}
                   onChange={handleChange}
                   className="col-span-3"
@@ -799,6 +695,7 @@ export default function Page() {
                 </Label>
                 <Input
                   id="hair"
+                  placeholder="Brown"
                   value={formData.hair}
                   onChange={handleChange}
                   className="col-span-3"
@@ -810,6 +707,7 @@ export default function Page() {
                 </Label>
                 <Input
                   id="eyes"
+                  placeholder="Green"
                   value={formData.eyes}
                   onChange={handleChange}
                   className="col-span-3"
@@ -820,6 +718,7 @@ export default function Page() {
                   Gender
                 </Label>
                 <Select
+                  placeholder="Female"
                   onValueChange={handleGenderChange}
                   value={formData.gender}
                 >
@@ -850,50 +749,6 @@ export default function Page() {
                   alt=""
                 />
               </div>
-
-              {/* //! image */}
-              {/* <div className="col-span-2">
-                <Button type="button" onClick={addAssests}>
-                  Add
-                </Button>
-              </div> */}
-              {/* {assets.map((item, index) => (
-                <>
-                  <div className="">
-                    <Label htmlFor="cover_img" className="text-left">
-                      Image type
-                    </Label>
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select image type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectItem value="carousel">Carousel</SelectItem>
-                          <SelectItem value="polaroid">polaroid</SelectItem>
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                    <Separator className="my-3" />
-                    <Label htmlFor="cover_img" className="text-left">
-                      Cover image
-                    </Label>
-                    <Input
-                      id="cover_img"
-                      type="file"
-                      onChange={handleChange}
-                      className="col-span-3"
-                    />
-                  </div>
-                  <div className=" p-5 md:p-3">
-                    <img
-                      className="aspect-square object-cover"
-                      src={previewCoverImage}
-                      alt=""
-                    />
-                  </div>
-                </>
-              ))} */}
             </div>
             <SheetFooter>
               <Button type="submit" disabled={loading}>
@@ -918,9 +773,6 @@ export default function Page() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            {/* <AlertDialogAction type="button" onClick={() => deleteModel()}>
-              Continue
-            </AlertDialogAction> */}
             <Button
               type="button"
               disabled={loading}

@@ -1,33 +1,25 @@
 "use client";
 
-import * as React from "react";
 import {
   AudioWaveform,
-  BookIcon,
   BookOpen,
   Bot,
   Calendar,
   Command,
-  Frame,
   GalleryVerticalEnd,
   Home,
   LogOut,
-  Map,
-  PieChart,
+  Palette,
   Settings2,
   SquareTerminal,
-  User,
-  User2,
+  Users,
 } from "lucide-react";
 
-import { NavMain } from "@/components/nav-main";
 import { NavProjects } from "@/components/nav-projects";
 import { NavUser } from "@/components/nav-user";
-import { TeamSwitcher } from "@/components/team-switcher";
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarHeader,
   SidebarMenu,
@@ -37,6 +29,8 @@ import {
 } from "@/components/ui/sidebar";
 import { Separator } from "@radix-ui/react-dropdown-menu";
 import fetchGlobal from "@/lib/fetch-data";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 // This is sample data.
 const data = {
@@ -158,7 +152,7 @@ const data = {
     {
       name: "Models",
       url: "/models",
-      icon: User,
+      icon: Palette,
     },
     {
       name: "Booking",
@@ -168,14 +162,19 @@ const data = {
     {
       name: "Users",
       url: "/user",
-      icon: User2,
+      icon: Users,
     },
   ],
 };
 
 export function AppSidebar({ ...props }) {
-  const user = localStorage.getItem("user");
-  const theUser = JSON.parse(user);
+  const router = useRouter();
+
+  const [theUser, setTheUser] = useState({
+    full_name: "",
+    email: "",
+    role: "",
+  });
 
   const handleLogout = async () => {
     try {
@@ -189,6 +188,15 @@ export function AppSidebar({ ...props }) {
     localStorage.removeItem("user");
     window.location.href = "/login";
   };
+
+  useEffect(() => {
+    const accessToken = sessionStorage.getItem("access_token");
+    const user = localStorage.getItem("user");
+    const temp = JSON.parse(user);
+
+    setTheUser(temp);
+    if (!accessToken) router.push("/login");
+  }, []);
 
   return (
     <Sidebar collapsible="icon" {...props}>

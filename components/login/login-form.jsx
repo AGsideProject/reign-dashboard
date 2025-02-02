@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -69,6 +69,12 @@ const LoginForm = ({ className, ...props }) => {
       setError(error?.message || "Something went wrong");
     }
   };
+
+  useEffect(() => {
+    const accessToken = sessionStorage.getItem("access_token");
+
+    if (accessToken) router.push("/");
+  }, []);
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>

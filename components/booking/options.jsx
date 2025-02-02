@@ -34,105 +34,13 @@ import {
 } from "@/components/ui/alert-dialog";
 import fetchGlobal from "@/lib/fetch-data";
 
-// Custom filter function for multi-column searching
-const multiColumnFilterFn = (row, columnId, filterValue) => {
-  const searchableRowContent =
-    `${row.original.name} ${row.original.email}`.toLowerCase();
-  const searchTerm = (filterValue ?? "").toLowerCase();
-  return searchableRowContent.includes(searchTerm);
-};
-
-const statusFilterFn = (row, columnId, filterValue) => {
-  if (!filterValue?.length) return true;
-  const status = row.getValue(columnId);
-  return filterValue.includes(status);
-};
-
-const columns = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    size: 28,
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    header: "Name",
-    accessorKey: "contact_name",
-    cell: ({ row }) => (
-      <div className="font-medium">{row.getValue("contact_name")}</div>
-    ),
-    size: 180,
-    filterFn: multiColumnFilterFn,
-    enableHiding: false,
-  },
-  {
-    header: "Email",
-    accessorKey: "email",
-    size: 220,
-  },
-  {
-    header: "Status",
-    accessorKey: "status",
-    cell: ({ row }) => {
-      const status = row.getValue("status");
-      return <Badge variant={status}>{status}</Badge>;
-    },
-    filterFn: statusFilterFn,
-  },
-  {
-    header: "Booking Hour",
-    accessorKey: "booking_hour",
-  },
-  {
-    header: "Shoot Date",
-    accessorKey: "shoot_date",
-    size: 100,
-    cell: ({ row }) => <div>{formatDateV1(row.getValue("shoot_date"))}</div>,
-  },
-  {
-    header: "Changed by",
-    accessorKey: "User",
-    size: 100,
-    cell: ({ row }) => {
-      const pic = row.getValue("User") || {};
-      return <div>{pic.full_name || "-"}</div>;
-    },
-  },
-  {
-    id: "actions",
-    header: () => <span className="sr-only">Actions</span>,
-    cell: ({ row }) => <RowActions row={row} />,
-    size: 60,
-    enableHiding: false,
-  },
-];
-
-export default columns;
-
-const RowActions = ({ row }) => {
+const RowActions = ({ data, row = {} }) => {
   const [openDialog, setOpenDialog] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [action, setAction] = useState("");
   const [error, setError] = useState("");
-  const status = row.getValue("status");
+  const status = data.status;
 
   const handleClickSelect = (event, type) => {
     event.preventDefault();
@@ -146,7 +54,7 @@ const RowActions = ({ row }) => {
     setError("");
     if (loading) return;
     try {
-      const bookingId = row.original.id;
+      const bookingId = data.id;
       let endpoint;
       let options;
       setLoading(true);
@@ -271,7 +179,7 @@ const RowActions = ({ row }) => {
                 {action !== "delete" && action !== "reject" && (
                   <span>
                     <b className="capitalize">{action}</b> Booking from:{" "}
-                    {row.getValue("contact_name")}
+                    {data.contact_name}
                   </span>
                 )}
               </AlertDialogTitle>
@@ -281,9 +189,7 @@ const RowActions = ({ row }) => {
                     <>
                       This action cannot be undone. This will permanently{" "}
                       <span className="text-destructive">{action}</span>{" "}
-                      <span className="font-bold">
-                        {row.getValue("contact_name")}'s
-                      </span>{" "}
+                      <span className="font-bold">{data.contact_name}'s</span>{" "}
                       booking.
                     </>
                   )}
@@ -309,13 +215,9 @@ const RowActions = ({ row }) => {
                     </div>
                     <div className="flex-1 pl-2">
                       The booking for{" "}
-                      <span className="font-bold">
-                        {row.getValue("contact_name")}
-                      </span>{" "}
+                      <span className="font-bold">{data.contact_name}</span>{" "}
                       from the brand{" "}
-                      <span className="font-bold">
-                        {row?.original?.brand_name}
-                      </span>
+                      <span className="font-bold">{data.brand_name}</span>
                     </div>
                   </div>
                   <div className="flex">
@@ -324,18 +226,13 @@ const RowActions = ({ row }) => {
                     </div>
                     <div className="flex-1 pl-2">
                       Scheduled for a{" "}
-                      <span className="font-bold">
-                        {row?.original?.booking_hour}
-                      </span>{" "}
+                      <span className="font-bold">{data.booking_hour}</span>{" "}
                       shoot on{" "}
                       <span className="font-bold">
-                        {formatDateV2(row?.original?.shoot_date)}
+                        {formatDateV2(data.shoot_date)}
                       </span>
                       , with the desired model{" "}
-                      <span className="font-bold">
-                        {row?.original?.desired_model}
-                      </span>
-                      .
+                      <span className="font-bold">{data.desired_model}</span>.
                     </div>
                   </div>
                   <div className="flex">
@@ -344,7 +241,7 @@ const RowActions = ({ row }) => {
                     </div>
                     <div className="flex-1 pl-2">
                       The images will be used for{" "}
-                      <span className="font-bold">{row?.original?.usages}</span>
+                      <span className="font-bold">{data.usages}</span>
                     </div>
                   </div>
                   <div className="flex">
@@ -353,14 +250,11 @@ const RowActions = ({ row }) => {
                     </div>
                     <div className="flex-1 pl-2">
                       <span className="font-bold">
-                        {row?.original?.contact_name.split(" ")[0]}
+                        {data.contact_name.split(" ")[0]}
                       </span>{" "}
                       can be contacted via WhatsApp at{" "}
-                      <span className="font-bold">
-                        {row?.original?.wa_number}
-                      </span>{" "}
-                      or email at{" "}
-                      <span className="font-bold">{row?.original?.email}</span>
+                      <span className="font-bold">{data.wa_number}</span> or
+                      email at <span className="font-bold">{data.email}</span>
                     </div>
                   </div>
                   <div className="flex">
@@ -402,3 +296,5 @@ const RowActions = ({ row }) => {
     </>
   );
 };
+
+export default RowActions;

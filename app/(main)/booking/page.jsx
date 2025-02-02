@@ -13,8 +13,6 @@ import {
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import {
   flexRender,
@@ -25,26 +23,13 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import {
-  ArrowRight,
-  CheckCheck,
-  ChevronDown,
-  ChevronUp,
-  Ellipsis,
-  Search,
-  SquareChartGantt,
-  X,
-} from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { useEffect, useId, useState } from "react";
 import columns from "@/components/booking/columns";
 import fetchGlobal from "@/lib/fetch-data";
 import PaginationControls from "@/components/booking/pagination-controls";
 import FilterBook from "@/components/booking/filter-book";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
+import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 
@@ -52,30 +37,11 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuPortal,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { ArchiveRestore, Plus, Share2, Trash } from "lucide-react";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 
 import {
@@ -94,14 +60,19 @@ import {
   PaginationItem,
 } from "@/components/ui/pagination";
 import useDeviceType from "@/hooks/use-device";
+import { formatDateV1 } from "@/lib/format-date";
+import RowActions from "@/components/booking/options";
 
 export default function Component() {
   const id = useId();
   // Initialize state
   const [data, setData] = useState([]);
+  const [filterdData, setFilterdData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [columnFilters, setColumnFilters] = useState([]);
   const [columnVisibility, setColumnVisibility] = useState({});
+  const [search, setSearch] = useState("");
+  const [curStat, setCurStat] = useState("");
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
@@ -137,9 +108,18 @@ export default function Component() {
   useEffect(() => {
     fetchGlobal("/v1/booking").then((res) => {
       setData(res);
+      setFilterdData(res);
       setIsLoading(false);
     });
   }, []);
+
+  useEffect(() => {
+    if (curStat) {
+      const arr = [...data];
+      const temp = arr.filter((item) => item.status === curStat);
+      setFilterdData(temp);
+    }
+  }, [curStat]);
 
   const device = useDeviceType();
 
@@ -308,7 +288,12 @@ export default function Component() {
           <div>
             {/* Sticky Navigation */}
             <div className="sticky top-1 z-10 bg-white p-2 shadow-lg rounded-md border border-gray-100">
-              <Input placeholder="Search..." type="search" />
+              <Input
+                placeholder="Search by Name..."
+                type="search"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
 
               <Select className="">
                 <SelectTrigger className="w-[150px] mt-2">
@@ -317,9 +302,17 @@ export default function Component() {
                 <SelectContent>
                   <SelectGroup>
                     <SelectLabel>Option</SelectLabel>
-                    <SelectItem value="status1">Status 1</SelectItem>
-                    <SelectItem value="status2">Status 2</SelectItem>
-                    <SelectItem value="status3">Status 3</SelectItem>
+                    {["incoming", "process", "reject", "done"].map(
+                      (item, index) => (
+                        <SelectItem
+                          key={`option-${index}`}
+                          onClick={() => setCurStat(item)}
+                          value={item}
+                        >
+                          {item}
+                        </SelectItem>
+                      )
+                    )}
                   </SelectGroup>
                 </SelectContent>
               </Select>
@@ -331,83 +324,56 @@ export default function Component() {
                 device === "mobile" ? "grid-cols-1" : "grid-cols-2"
               }  gap-2 p-2 pb-20`}
             >
-              {Array.from({ length: 10 }).map((_, index) => (
-                <Card key={index}>
-                  <CardHeader className="flex flex-row items-center justify-between">
-                    <div>
-                      <CardTitle>Tabhita</CardTitle>
-                      <CardDescription>tabhita@mail.com</CardDescription>
-                    </div>
-                    <Badge variant="outline" className="gap-1.5">
-                      <span
-                        className="size-1.5 rounded-full bg-blue-500"
-                        aria-hidden="true"
-                      ></span>
-                      Process
-                    </Badge>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-col gap-2">
-                      <div className="flex items-center justify-between">
-                        <p>Booking hour</p>
-                        <p>2 hours</p>
+              {filterdData
+                ?.filter((item) => item?.contact_name?.includes(search))
+                .map((book, index) => (
+                  <Card key={index}>
+                    <CardHeader className="flex flex-row items-center justify-between">
+                      <div>
+                        <CardTitle>{book.contact_name}</CardTitle>
+                        <CardDescription>{book.email}</CardDescription>
                       </div>
-                      <div className="flex items-center justify-between">
-                        <p>Shoot date</p>
-                        <p>25 Feb 2025</p>
+                      <Badge variant="outline" className="gap-1.5">
+                        <span
+                          className={`size-1.5 rounded-full ${
+                            book.status === "incoming"
+                              ? "bg-yellow-500"
+                              : book.status === "process"
+                              ? "bg-blue-500"
+                              : book.status === "reject"
+                              ? "bg-red-500"
+                              : book.status === "done"
+                              ? "bg-green-500"
+                              : ""
+                          }`}
+                          aria-hidden="true"
+                        />
+                        <span style={{ textTransform: "capitalize" }}>
+                          {book.status}
+                        </span>
+                      </Badge>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex flex-col gap-2">
+                        <div className="flex items-center justify-between">
+                          <p>Booking hour</p>
+                          <p>{book.booking_hour}</p>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <p>Shoot date</p>
+                          <p>{formatDateV1(book.shoot_date)}</p>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <p>Changed by</p>
+                          <p>{book?.User?.full_name || "-"}</p>
+                        </div>
+                        <div className="flex items-center justify-end">
+                          <RowActions data={book} />
+                        </div>
                       </div>
-                      <div className="flex items-center justify-between">
-                        <p>Changed by</p>
-                        <p>Admin</p>
-                      </div>
-                      <div className="flex items-center justify-end">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              className="shadow-none"
-                              aria-label="Edit item"
-                            >
-                              <Ellipsis
-                                size={16}
-                                strokeWidth={2}
-                                aria-hidden="true"
-                              />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent>
-                            <DropdownMenuGroup>
-                              <DropdownMenuItem>
-                                <SquareChartGantt />
-                                <span>View Detail</span>
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem>
-                                <CheckCheck />
-                                <span>Done</span>
-                              </DropdownMenuItem>
-                              <DropdownMenuItem>
-                                <X />
-                                <span>Reject</span>
-                              </DropdownMenuItem>
-                            </DropdownMenuGroup>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-destructive focus:text-destructive">
-                              <Trash
-                                size={16}
-                                strokeWidth={2}
-                                aria-hidden="true"
-                              />
-                              <span>Delete</span>
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                ))}
               {/* //! pagination */}
               <div
                 className={`${
@@ -428,38 +394,18 @@ export default function Component() {
                         <Button
                           variant="outline"
                           className="aria-disabled:pointer-events-none aria-disabled:opacity-50"
-                          // aria-disabled={currentPage === 1 ? true : undefined}
-                          // role={currentPage === 1 ? "link" : undefined}
                           asChild
                         >
-                          <a
-                          // href={
-                          //   currentPage === 1
-                          //     ? undefined
-                          //     : `#/page/${currentPage - 1}`
-                          // }
-                          >
-                            Previous
-                          </a>
+                          <a>Previous</a>
                         </Button>
                       </PaginationItem>
                       <PaginationItem>
                         <Button
                           variant="outline"
                           className="aria-disabled:pointer-events-none aria-disabled:opacity-50"
-                          // aria-disabled={currentPage === totalPages ? true : undefined}
-                          // role={currentPage === totalPages ? "link" : undefined}
                           asChild
                         >
-                          <a
-                          // href={
-                          //   currentPage === totalPages
-                          //     ? undefined
-                          //     : `#/page/${currentPage + 1}`
-                          // }
-                          >
-                            Next
-                          </a>
+                          <a>Next</a>
                         </Button>
                       </PaginationItem>
                     </PaginationContent>
