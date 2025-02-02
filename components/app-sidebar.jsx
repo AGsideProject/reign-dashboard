@@ -1,32 +1,36 @@
 "use client";
 
-import * as React from "react";
 import {
   AudioWaveform,
   BookOpen,
   Bot,
+  Calendar,
   Command,
-  Frame,
   GalleryVerticalEnd,
   Home,
-  Map,
-  PieChart,
+  LogOut,
+  Palette,
   Settings2,
   SquareTerminal,
-  User,
+  Users,
 } from "lucide-react";
 
-import { NavMain } from "@/components/nav-main";
 import { NavProjects } from "@/components/nav-projects";
 import { NavUser } from "@/components/nav-user";
-import { TeamSwitcher } from "@/components/team-switcher";
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
+  SidebarGroup,
   SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
+import { Separator } from "@radix-ui/react-dropdown-menu";
+import fetchGlobal from "@/lib/fetch-data";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 // This is sample data.
 const data = {
@@ -148,35 +152,79 @@ const data = {
     {
       name: "Models",
       url: "/models",
-      icon: User,
+      icon: Palette,
     },
-    // {
-    //   name: "Sales & Marketing",
-    //   url: "#",
-    //   icon: PieChart,
-    // },
-    // {
-    //   name: "Travel",
-    //   url: "#",
-    //   icon: Map,
-    // },
+    {
+      name: "Booking",
+      url: "/booking",
+      icon: Calendar,
+    },
+    {
+      name: "Users",
+      url: "/user",
+      icon: Users,
+    },
   ],
 };
 
 export function AppSidebar({ ...props }) {
+  const router = useRouter();
+
+  const [theUser, setTheUser] = useState({
+    full_name: "",
+    email: "",
+    role: "",
+  });
+
+  const handleLogout = async () => {
+    try {
+      await fetchGlobal("/v1/logout", {
+        method: "POST",
+      });
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+    sessionStorage.removeItem("access_token");
+    localStorage.removeItem("user");
+    window.location.href = "/login";
+  };
+
+  useEffect(() => {
+    const accessToken = sessionStorage.getItem("access_token");
+    const user = localStorage.getItem("user");
+    const temp = JSON.parse(user);
+
+    setTheUser(temp);
+    if (!accessToken) router.push("/login");
+  }, []);
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         {/* <TeamSwitcher teams={data.teams} /> */}
-        <NavUser user={data.user} />
+        <NavUser user={theUser} />
       </SidebarHeader>
       <SidebarContent>
         {/* <NavMain items={data.navMain} /> */}
         <NavProjects projects={data.projects} />
+        <SidebarGroup className="group-data-[collapsible=icon]:hidden">
+          <Separator />
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild onClick={handleLogout}>
+                <div className="flex gap-4 items-center text-destructive hover:text-destructive ">
+                  <LogOut size={14} />
+                  Logout
+                </div>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroup>
       </SidebarContent>
       {/* <SidebarFooter>
         <NavUser user={data.user} />
       </SidebarFooter> */}
+
       <SidebarRail />
     </Sidebar>
   );
