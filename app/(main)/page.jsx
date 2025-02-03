@@ -187,7 +187,7 @@ const Dashboard = () => {
               <p className="text-5xl font-bold">{dataStat.incoming}</p>
               <p className="text-gray-600 mt-2">Incoming Boooking</p>
 
-              {dataBooks?.incoming && dataBooks.incoming.length && (
+              {dataBooks?.incoming && dataBooks.incoming && (
                 <p className="bg-[#bebebe] text-[11px] px-2 py-1 rounded-lg mt-1 mb-3">
                   {formatDateV1(dataBooks?.incoming[0]?.updatedAt)}
                 </p>
@@ -227,7 +227,7 @@ const Dashboard = () => {
               <p className="text-5xl font-bold">{dataStat.process}</p>
               <p className="text-gray-600 mt-2">On Progress</p>
 
-              {dataBooks?.process && dataBooks.process.length && (
+              {dataBooks?.process && dataBooks.process && (
                 <p className="bg-[#bebebe] text-[11px] px-2 py-1 rounded-lg mt-1 mb-3">
                   {formatDateV1(dataBooks?.process[0]?.updatedAt)}
                 </p>
