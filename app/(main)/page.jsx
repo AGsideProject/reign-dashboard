@@ -25,8 +25,10 @@ import {
 import fetchGlobal from "@/lib/fetch-data";
 import { useToast } from "@/hooks/use-toast";
 import { formatDateV1 } from "@/lib/format-date";
+import { useRouter } from "next/navigation";
 
 const Dashboard = () => {
+  const router = useRouter();
   const { toast } = useToast();
   const inputRef = useRef(null);
   // Initialize state
@@ -146,7 +148,10 @@ const Dashboard = () => {
       {dataStat && (
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-min">
-            <div className="bg-black rounded-xl min-h-[300px] pt-5 px-3 flex flex-col items-center shadow-xl">
+            <div
+              className="bg-black rounded-xl min-h-[300px] pt-5 px-3 flex flex-col items-center shadow-xl"
+              onClick={() => router.push("/model")}
+            >
               <div className="w-[60px] h-[60px] rounded-full bg-white flex items-center justify-center ">
                 <Trophy />
               </div>
@@ -172,7 +177,10 @@ const Dashboard = () => {
               ))}
             </div>
 
-            <div className="bg-white shadow-xl rounded-xl py-5 px-3 items-center flex flex-col relative">
+            <div
+              className="bg-white shadow-xl rounded-xl py-5 px-3 items-center flex flex-col relative"
+              onClick={() => router.push("/booking")}
+            >
               <div className="w-[60px] h-[60px] rounded-full bg-[#bebebe] flex items-center justify-center shadow-xl mb-4">
                 <BetweenVerticalStart />
               </div>
@@ -209,7 +217,10 @@ const Dashboard = () => {
               </div>
             </div>
 
-            <div className="bg-white shadow-xl rounded-xl py-5 px-3 items-center flex flex-col relative">
+            <div
+              className="bg-white shadow-xl rounded-xl py-5 px-3 items-center flex flex-col relative"
+              onClick={() => router.push("/booking")}
+            >
               <div className="w-[60px] h-[60px] rounded-full bg-[#bebebe] flex items-center justify-center shadow-xl mb-4">
                 <Focus />
               </div>
@@ -246,7 +257,10 @@ const Dashboard = () => {
               </div>
             </div>
 
-            <div className="bg-white shadow-xl rounded-xl py-5 px-3 items-center flex flex-col relative">
+            <div
+              className="bg-white shadow-xl rounded-xl py-5 px-3 items-center flex flex-col relative"
+              onClick={() => router.push("/booking")}
+            >
               <div className="w-[60px] h-[60px] rounded-full bg-[#bebebe] flex items-center justify-center shadow-xl mb-4">
                 <HandCoins />
               </div>
