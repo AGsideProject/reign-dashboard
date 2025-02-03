@@ -33,6 +33,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import fetchGlobal from "@/lib/fetch-data";
+import ModelListSelect from "./models-list";
 
 // Custom filter function for multi-column searching
 const multiColumnFilterFn = (row, columnId, filterValue) => {
@@ -132,6 +133,8 @@ const RowActions = ({ row }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [action, setAction] = useState("");
   const [error, setError] = useState("");
+  const [isDisabled, setIsDisabled] = useState(true);
+  const [formUpdate, setFormUpdate] = useState({});
   const status = row.getValue("status");
 
   const handleClickSelect = (event, type) => {
@@ -156,6 +159,14 @@ const RowActions = ({ row }) => {
           method: "DELETE",
         };
       } else {
+        if (action === "process") {
+          await fetchGlobal(
+            `/v1/booking/${bookingId}`,
+            { method: "PATCH", body: JSON.stringify(formUpdate) },
+            true
+          );
+        }
+
         endpoint = `/v1/booking/${bookingId}/status`;
         options = {
           method: "PATCH",
@@ -287,7 +298,8 @@ const RowActions = ({ row }) => {
                       booking.
                     </>
                   )}
-                  {(action === "process" || action === "done") && (
+
+                  {action === "done" && (
                     <>
                       This action will update the status booking to{" "}
                       <span
@@ -301,6 +313,14 @@ const RowActions = ({ row }) => {
                   )}
                 </AlertDialogDescription>
               )}
+
+              {action === "process" && (
+                <ModelListSelect
+                  setIsDisabled={setIsDisabled}
+                  setFormUpdate={setFormUpdate}
+                />
+              )}
+
               {action === "detail" && (
                 <div className="grid gap-2.5 mt-6 mb-6 text-sm">
                   <div className="flex">
@@ -390,7 +410,10 @@ const RowActions = ({ row }) => {
             </AlertDialogCancel>
 
             {action !== "detail" && (
-              <AlertDialogAction onClick={handleClickButton}>
+              <AlertDialogAction
+                onClick={handleClickButton}
+                disabled={isDisabled && action === "process"}
+              >
                 <span className="capitalize">
                   {loading ? "loading..." : action}
                 </span>

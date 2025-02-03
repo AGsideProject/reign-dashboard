@@ -1,8 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,7 +19,7 @@ import {
   GitPullRequestClosed,
   CheckCheck,
 } from "lucide-react";
-import { formatDateV1, formatDateV2 } from "@/lib/format-date";
+import { formatDateV2 } from "@/lib/format-date";
 import {
   AlertDialog,
   AlertDialogAction,
