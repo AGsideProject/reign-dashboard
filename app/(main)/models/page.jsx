@@ -716,7 +716,7 @@ export default function Page() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="col-span-2">
+              <div>
                 <Label htmlFor="cover_img" className="text-left">
                   Cover image
                 </Label>

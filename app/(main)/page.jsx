@@ -149,10 +149,10 @@ const Dashboard = () => {
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-min">
             <div
-              className="bg-black rounded-xl min-h-[300px] pt-5 px-3 flex flex-col items-center shadow-xl"
-              onClick={() => router.push("/model")}
+              className="bg-white rounded-xl min-h-[300px] pt-5 px-3 flex flex-col items-center shadow-xl"
+              onClick={() => router.push("/models")}
             >
-              <div className="w-[60px] h-[60px] rounded-full bg-white flex items-center justify-center ">
+              <div className="w-[60px] h-[60px] rounded-full bg-[#bebebe] flex items-center justify-center ">
                 <Trophy />
               </div>
               <p className="text-center text-white mb-3 mt-3 font-medium">
@@ -164,7 +164,7 @@ const Dashboard = () => {
                   key={idx + "model"}
                   className="flex items-center relative mb-6 w-full"
                 >
-                  <p className="rounded-full h-11 w-11 absolute shadow-xl bg-white border-[1px] flex justify-center items-center">
+                  <p className="h-11 w-11 absolute bg-white flex justify-center items-center">
                     {idx + 1}
                   </p>
                   <p className="bg-white py-1 pl-5 flex-1 h-8 ml-8 flex justify-between items-center pr-2">
@@ -211,10 +211,6 @@ const Dashboard = () => {
                   </p>
                 </div>
               )}
-
-              <div className="absolute bottom-5 right-5">
-                <Library />
-              </div>
             </div>
 
             <div
@@ -252,9 +248,9 @@ const Dashboard = () => {
                 </div>
               )}
 
-              <div className="absolute bottom-5 right-5">
+              {/* <div className="absolute bottom-5 right-5">
                 <LibraryBig />
-              </div>
+              </div> */}
             </div>
 
             <div
@@ -289,9 +285,9 @@ const Dashboard = () => {
                 </div>
               )}
 
-              <div className="absolute bottom-5 right-5">
+              {/* <div className="absolute bottom-5 right-5">
                 <SquareLibrary />
-              </div>
+              </div> */}
             </div>
           </div>
 

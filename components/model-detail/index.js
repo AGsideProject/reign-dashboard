@@ -731,7 +731,7 @@ export default function ModelDetailPage() {
                           }
                         }}
                       >
-                        <div className="aspect-square relative">
+                        <div className="aspect-square relative m-2">
                           {/* Placeholder image */}
                           <Image
                             src={reignLogo}
@@ -747,7 +747,7 @@ export default function ModelDetailPage() {
                             alt="asset image"
                             fill={true}
                             priority
-                            className="object-cover"
+                            className="object-cover "
                             style={{ zIndex: 2 }}
                             onError={(e) => {
                               e.target.style.display = "none";
@@ -778,14 +778,14 @@ export default function ModelDetailPage() {
                               <DropdownMenuGroup>
                                 {(tabsValue === "polaroid" ||
                                   tabsValue === "carousel") && (
-                                  <DropdownMenuItem
-                                    onClick={() =>
-                                      handleChangePhotoPosition(item, index)
-                                    }
-                                  >
-                                    Change position
-                                  </DropdownMenuItem>
-                                )}
+                                    <DropdownMenuItem
+                                      onClick={() =>
+                                        handleChangePhotoPosition(item, index)
+                                      }
+                                    >
+                                      Change position
+                                    </DropdownMenuItem>
+                                  )}
 
                                 <DropdownMenuItem
                                   onClick={() =>
@@ -873,11 +873,10 @@ export default function ModelDetailPage() {
                           <img
                             src={photo.preview}
                             alt={`Preview ${index + 1}`}
-                            className={`object-cover aspect-[3/4] rounded-sm ${
-                              photo?.file?.size > 10000000
-                                ? "border-red-500 border-2"
-                                : "border-none"
-                            }`}
+                            className={`object-cover aspect-[3/4] rounded-sm ${photo?.file?.size > 10000000
+                              ? "border-red-500 border-2"
+                              : "border-none"
+                              }`}
                           />
                         </div>
                       ))}
@@ -919,11 +918,10 @@ export default function ModelDetailPage() {
                           <img
                             src={photo.preview}
                             alt={`Preview ${index + 1}`}
-                            className={`object-cover aspect-video rounded-sm ${
-                              photo?.file?.size > 10000000
-                                ? "border-red-500 border-2"
-                                : "border-none"
-                            }`}
+                            className={`object-cover aspect-video rounded-sm ${photo?.file?.size > 10000000
+                              ? "border-red-500 border-2"
+                              : "border-none"
+                              }`}
                           />
                         </div>
                       ))}
