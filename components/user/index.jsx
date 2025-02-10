@@ -193,23 +193,28 @@ const UserPageComponent = ({ data, reFetch }) => {
       </div>
 
       {/* Dialog Add User */}
-      <RegisterUserComponent
-        openDialog={openAdd}
-        setOpenDialog={setOpenAdd}
-        data={currentUser}
-        setData={setCurrentUser}
-        type={typeBtn}
-        reFetch={reFetch}
-      />
 
-      <AlertComponentDeleteUser
-        isLoading={loading}
-        openDialog={openDelete}
-        setOpenDialog={setOpenDelete}
-        handleClick={handleClickDelete}
-        error={error}
-        setError={setError}
-      />
+      {openAdd && (
+        <RegisterUserComponent
+          openDialog={openAdd}
+          setOpenDialog={setOpenAdd}
+          data={currentUser}
+          setData={setCurrentUser}
+          type={typeBtn}
+          reFetch={reFetch}
+        />
+      )}
+
+      {openDelete && (
+        <AlertComponentDeleteUser
+          isLoading={loading}
+          openDialog={openDelete}
+          setOpenDialog={setOpenDelete}
+          handleClick={handleClickDelete}
+          error={error}
+          setError={setError}
+        />
+      )}
     </React.Fragment>
   );
 };

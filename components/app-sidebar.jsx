@@ -146,22 +146,22 @@ const data = {
   projects: [
     {
       name: "Home",
-      url: "/",
+      url: "",
       icon: Home,
     },
     {
       name: "Models",
-      url: "/models",
+      url: "models",
       icon: Palette,
     },
     {
       name: "Booking",
-      url: "/booking",
+      url: "booking",
       icon: Calendar,
     },
     {
       name: "Users",
-      url: "/user",
+      url: "user",
       icon: Users,
     },
   ],

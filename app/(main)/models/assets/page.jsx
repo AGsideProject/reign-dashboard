@@ -80,6 +80,7 @@ import {
   TooltipProvider,
 } from "@radix-ui/react-tooltip";
 import InstagramSycModal from "@/components/modelDialog/instagram-sinc-modal";
+import reignLogo from "@/public/images/reignLogo.jpg";
 
 export default function Page() {
   const { toast } = useToast();
@@ -199,7 +200,6 @@ export default function Page() {
     });
 
     const mergeData = [...dataPortrait, ...dataLandscape];
-    console.log(mergeData, "< mergeData");
 
     for (const data of mergeData) {
       const formData = new FormData();
@@ -222,7 +222,6 @@ export default function Page() {
 
         successCount++;
         setUploadCount(successCount);
-        console.log("Uploaded: ", dataGlobal);
       } catch (error) {
         console.error("Upload failed: ", error);
         failureCount++;
@@ -258,8 +257,6 @@ export default function Page() {
           });
           // Mixed result toast
         }
-
-        console.log("All uploads finished.");
       }
     }
   };
@@ -316,8 +313,6 @@ export default function Page() {
   //! function untuk handle photo position manual
   const handleChangePhotoPosition = (item, index) => {
     setChangeOrderDialog(true);
-    console.log(index, "<");
-    console.log(item);
     setCurrentImagePosition({
       assetId: item.id,
       currenctOrder: Number(index + 1),
@@ -329,11 +324,8 @@ export default function Page() {
   //! change position photo manual
   const handleSubmitChangePosition = async (e) => {
     e.preventDefault();
-    console.log({ newPhotoPosition, currentImagePosition });
 
-    console.log(filteredAsset);
     const bodyTest = filteredAsset[newPhotoPosition - 1].order;
-    console.log(bodyTest);
 
     setLoading(true);
     try {
@@ -409,8 +401,6 @@ export default function Page() {
 
   //! useEffect buat watch options pas manual change photo position
   useEffect(() => {
-    console.log(currentImagePosition, "< currentImagePosition");
-
     if (tabsValue === "carousel") {
       const options = filteredAsset?.map((item, index) => {
         let _index = index + 1;
@@ -418,8 +408,6 @@ export default function Page() {
           value: _index.toString(),
         };
       });
-
-      console.log(options, "<options");
 
       setPhotoPositionOptions(options || []);
     } else if (tabsValue === "polaroid") {
@@ -463,12 +451,10 @@ export default function Page() {
     setLoading(true);
     try {
       const dataGlobal = await fetchGlobal(`/v1/assets/admin/${model_id}`);
-      console.log(dataGlobal, "<<dataGlobal");
 
       setModelAssetList(dataGlobal);
       setLoading(false);
     } catch (error) {
-      console.log(error);
       toast({
         title: "Mission: Fetch Image - FAILED 🎬",
         description:
@@ -480,9 +466,7 @@ export default function Page() {
 
   //! function untuk update status asset
   const handleStatusChange = async (status, id) => {
-    console.log(status, id);
     let newStatus = status === "active" ? "inactive" : "active";
-    console.log(newStatus);
     try {
       const _formBody = new URLSearchParams();
       _formBody.append("status", newStatus);
@@ -510,7 +494,6 @@ export default function Page() {
       fetchModelAsset();
     } catch (error) {
       console.error("Error saving changes", error);
-      console.log(error, "< error");
       toast({
         title: "Asset Update? More Like Asset Oops! 😬",
         description:
@@ -527,7 +510,6 @@ export default function Page() {
 
   //! handle sebelum delete
   const handleDeleteAsset = (asset) => {
-    console.log(asset);
     setDeleteDialogAsset(true);
     setAssetId(asset.id);
   };
@@ -749,25 +731,34 @@ export default function Page() {
                           }
                         }}
                       >
-                        <div className="p-2">
+                        <div className="aspect-square relative">
+                          {/* Placeholder image */}
                           <Image
-                            src={item.img_url}
+                            src={reignLogo}
+                            alt="reign models"
+                            fill={true}
+                            placeholder="blur"
+                            className="object-cover"
+                            style={{ zIndex: 1 }}
+                          />
+                          {/* Real Image */}
+                          <Image
+                            src={`${item.img_url}?${Date.now()}`}
                             alt="asset image"
-                            width={400}
-                            height={400}
-                            className="object-cover aspect-square"
+                            fill={true}
+                            priority
+                            className="object-cover"
+                            style={{ zIndex: 2 }}
+                            onError={(e) => {
+                              e.target.style.display = "none";
+                            }}
                           />
                         </div>
                         <div className="flex items-center justify-between min-h-min pb-1 mx-2">
                           <span className="text-xs font-semibold">
                             {item.orientation === "portrait" ? "P" : "L"}
                           </span>
-                          <span className="text-xs font-semibold">
-                            O :{item.order}
-                          </span>
-                          <span className="text-xs font-semibold">
-                            id :{item.id}
-                          </span>
+
                           <DropdownMenu
                             open={openStates[index] || false}
                             onOpenChange={(isOpen) =>
@@ -785,11 +776,6 @@ export default function Page() {
                             >
                               <DropdownMenuLabel>Options</DropdownMenuLabel>
                               <DropdownMenuGroup>
-                                <DropdownMenuItem
-                                  onClick={() => console.log(item)}
-                                >
-                                  Test data
-                                </DropdownMenuItem>
                                 {(tabsValue === "polaroid" ||
                                   tabsValue === "carousel") && (
                                   <DropdownMenuItem

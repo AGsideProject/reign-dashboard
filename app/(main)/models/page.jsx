@@ -134,7 +134,6 @@ export default function Page() {
     e.preventDefault();
 
     if (formData.id) {
-      console.log("update");
       try {
         setLoading(true);
 
@@ -154,8 +153,6 @@ export default function Page() {
         _formData.append("user_id", "6771edda-8cd4-8003-8f83-3c1a76660611");
         _formData.append("gender", formData.gender);
         // _formData.append("status", "active");
-
-        console.log(_formData, "< _formData");
 
         const dataGlobal = await fetchGlobal(
           `/v1/model/admin/${id}`,
@@ -192,9 +189,7 @@ export default function Page() {
         });
       }
     } else {
-      console.log("add");
       try {
-        console.log("Form Data:", formData);
         setLoading(true);
         const _formData = new FormData();
         _formData.append("name", formData.name);
@@ -212,8 +207,6 @@ export default function Page() {
         _formData.append("gender", formData.gender);
         _formData.append("status", "active");
 
-        console.log(_formData, "< _formData");
-
         const dataGlobal = await fetchGlobal(
           "/v1/model/admin",
           {
@@ -223,8 +216,6 @@ export default function Page() {
           },
           true
         );
-
-        console.log(dataGlobal, "< dataGlobal");
 
         toast({
           title: "Strike a Pose! 📸",
@@ -255,7 +246,6 @@ export default function Page() {
 
   //! untuk handle model status
   const handleStatusChange = async (status, id) => {
-    console.log(status, id);
     let newStatus = status === "active" ? "inactive" : "active";
 
     try {
@@ -392,8 +382,6 @@ export default function Page() {
   const [filteredModels, setFilteredModels] = useState(modelList);
 
   useEffect(() => {
-    console.log(tabsValue, "keganti");
-
     if (tabsValue === "all") {
       setFilteredModels(modelList);
     } else {
@@ -552,9 +540,6 @@ export default function Page() {
                             }
                           >
                             {model.status === "active" ? "Hide" : "Show"}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => console.log(model)}>
-                            Test data
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
