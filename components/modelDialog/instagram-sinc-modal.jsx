@@ -45,7 +45,7 @@ const InstagramSycModal = ({
         true
       );
 
-      if (response.status == 200) {
+      if (response) {
         setLoading(false);
         setOpenDialog(false);
         toast({
