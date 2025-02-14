@@ -701,10 +701,12 @@ export default function ModelDetailPage() {
 
             <p
               className={`${
-                curPortrait % 2 !== 0 ? "text-destructive" : "text-white"
-              } mb-1`}
+                curPortrait % 2 !== 0 && tabsValue === "carousel"
+                  ? "bg-red-500"
+                  : "bg-white"
+              } mb-1 text-white py-1 text-sm text-center`}
             >
-              For a better display, do not upload an odd number of portrait
+              For a better display, do not upload an odd number of 'portrait'
               assets. | <b>Current Portrait: {curPortrait}</b>
             </p>
 
