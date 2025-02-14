@@ -90,6 +90,7 @@ export default function ModelDetailPage() {
   const [loading, setLoading] = useState(false);
   const [imagesUpdate, setImagesUpdate] = useState(false);
   const [openModal, setOpenModal] = useState(false);
+  const [curPortrait, setCurPortrait] = useState(0);
 
   const model = searchParams.get("model");
   const model_id = searchParams.get("id");
@@ -371,9 +372,15 @@ export default function ModelDetailPage() {
   //! useEffect untuk filter asset based on tabs
   useEffect(() => {
     if (tabsValue === "carousel") {
-      setFilteredAsset(
-        modelAssetList?.carousel?.filter((item) => item.status === "active")
+      const temp = modelAssetList?.carousel?.filter(
+        (item) => item.status === "active"
       );
+      const tempv2 =
+        modelAssetList?.carousel?.filter(
+          (item) => item.status === "active" && item.orientation === "portrait"
+        ) || [];
+      setFilteredAsset(temp);
+      setCurPortrait(tempv2.length);
     } else if (tabsValue === "polaroid") {
       setFilteredAsset(
         modelAssetList?.polaroid?.filter((item) => item.status === "active")
@@ -588,7 +595,7 @@ export default function ModelDetailPage() {
             onValueChange={(value) => setTabsValue(value)}
             value={tabsValue}
           >
-            <div className="flex justify-between mb-10">
+            <div className="flex justify-between mb-1">
               <TabsList>
                 <TabsTrigger
                   value="carousel"
@@ -692,6 +699,15 @@ export default function ModelDetailPage() {
               </div>
             </div>
 
+            <p
+              className={`${
+                curPortrait % 2 !== 0 ? "text-destructive" : "text-white"
+              } mb-1`}
+            >
+              For a better display, do not upload an odd number of portrait
+              assets. | <b>Current Portrait: {curPortrait}</b>
+            </p>
+
             <TabsContent value={tabsValue}>
               <div className="relative">
                 {filteredAsset && !filteredAsset.length && !loading && (
@@ -778,14 +794,14 @@ export default function ModelDetailPage() {
                               <DropdownMenuGroup>
                                 {(tabsValue === "polaroid" ||
                                   tabsValue === "carousel") && (
-                                    <DropdownMenuItem
-                                      onClick={() =>
-                                        handleChangePhotoPosition(item, index)
-                                      }
-                                    >
-                                      Change position
-                                    </DropdownMenuItem>
-                                  )}
+                                  <DropdownMenuItem
+                                    onClick={() =>
+                                      handleChangePhotoPosition(item, index)
+                                    }
+                                  >
+                                    Change position
+                                  </DropdownMenuItem>
+                                )}
 
                                 <DropdownMenuItem
                                   onClick={() =>
@@ -873,10 +889,11 @@ export default function ModelDetailPage() {
                           <img
                             src={photo.preview}
                             alt={`Preview ${index + 1}`}
-                            className={`object-cover aspect-[3/4] rounded-sm ${photo?.file?.size > 10000000
-                              ? "border-red-500 border-2"
-                              : "border-none"
-                              }`}
+                            className={`object-cover aspect-[3/4] rounded-sm ${
+                              photo?.file?.size > 10000000
+                                ? "border-red-500 border-2"
+                                : "border-none"
+                            }`}
                           />
                         </div>
                       ))}
@@ -918,10 +935,11 @@ export default function ModelDetailPage() {
                           <img
                             src={photo.preview}
                             alt={`Preview ${index + 1}`}
-                            className={`object-cover aspect-video rounded-sm ${photo?.file?.size > 10000000
-                              ? "border-red-500 border-2"
-                              : "border-none"
-                              }`}
+                            className={`object-cover aspect-video rounded-sm ${
+                              photo?.file?.size > 10000000
+                                ? "border-red-500 border-2"
+                                : "border-none"
+                            }`}
                           />
                         </div>
                       ))}
