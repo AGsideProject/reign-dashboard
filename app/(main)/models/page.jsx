@@ -598,16 +598,22 @@ export default function Page() {
                 />
               </div>
               <div>
-                <Label htmlFor="name" className="text-left">
-                  Instagram
+                <Label htmlFor="gender" className="text-left">
+                  Gender
                 </Label>
-                <Input
-                  id="ig_username"
-                  placeholder="janedoe"
-                  value={formData.ig_username}
-                  onChange={handleChange}
-                  className="col-span-3"
-                />
+                <Select
+                  placeholder="Female"
+                  onValueChange={handleGenderChange}
+                  value={formData.gender}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={"Select"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={"male"}>Male</SelectItem>
+                    <SelectItem value={"female"}>Female</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label htmlFor="height" className="text-left">
@@ -624,7 +630,7 @@ export default function Page() {
               </div>
               <div>
                 <Label htmlFor="bust" className="text-left">
-                  Bust
+                  {formData.gender === "male" ? "Chest" : "Bust"}
                 </Label>
                 <Input
                   id="bust"
@@ -699,23 +705,18 @@ export default function Page() {
                 />
               </div>
               <div>
-                <Label htmlFor="gender" className="text-left">
-                  Gender
+                <Label htmlFor="name" className="text-left">
+                  Instagram
                 </Label>
-                <Select
-                  placeholder="Female"
-                  onValueChange={handleGenderChange}
-                  value={formData.gender}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={"Select"} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={"male"}>Male</SelectItem>
-                    <SelectItem value={"female"}>Female</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Input
+                  id="ig_username"
+                  placeholder="janedoe"
+                  value={formData.ig_username}
+                  onChange={handleChange}
+                  className="col-span-3"
+                />
               </div>
+
               <div>
                 <Label htmlFor="cover_img" className="text-left">
                   Cover image
