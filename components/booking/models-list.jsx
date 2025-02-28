@@ -102,7 +102,7 @@ const ModelListSelect = ({ id, setIsDisabled, setFormUpdate }) => {
                     <div className="flex gap-2 items-center">
                       <img
                         alt={model.name}
-                        src={model.cover_img}
+                        src={`${process.env.NEXT_PUBLIC_API_BASE_URL}${model.cover_img}`}
                         className="h-8 w-8 rounded-full"
                       />
                       <p

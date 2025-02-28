@@ -63,7 +63,7 @@ const Dashboard = () => {
 
   const fetchImage = () => {
     fetchGlobal("/v1/assets/landingpage").then((res) => {
-      setImageInit(res?.img_url);
+      setImageInit(`${process.env.NEXT_PUBLIC_API_BASE_URL}${res?.img_url}`);
       setCurIdx(res.id);
     });
   };

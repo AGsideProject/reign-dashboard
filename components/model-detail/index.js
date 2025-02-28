@@ -759,18 +759,45 @@ export default function ModelDetailPage() {
                             className="object-cover"
                             style={{ zIndex: 1 }}
                           />
+
                           {/* Real Image */}
-                          <Image
-                            src={`${item.img_url}?${Date.now()}`}
-                            alt="asset image"
-                            fill={true}
-                            priority
-                            className="object-cover "
-                            style={{ zIndex: 2 }}
-                            onError={(e) => {
-                              e.target.style.display = "none";
-                            }}
-                          />
+                          {tabsValue === "instagram" ? (
+                            <Image
+                              src={`${
+                                process.env.NEXT_PUBLIC_API_BASE_URL
+                              }${item.img_url?.replace(
+                                "/Assets/instagram/",
+                                "/Assets/instagram/mini_"
+                              )}`}
+                              alt="asset image"
+                              fill={true}
+                              priority
+                              className="object-cover "
+                              style={{ zIndex: 2 }}
+                              onError={(e) => {
+                                e.target.style.display = "none";
+                              }}
+                              unoptimized
+                            />
+                          ) : (
+                            <Image
+                              src={`${
+                                process.env.NEXT_PUBLIC_API_BASE_URL
+                              }${item.img_url?.replace(
+                                "/Assets/",
+                                "/Assets/mini_"
+                              )}`}
+                              alt="asset image"
+                              fill={true}
+                              priority
+                              className="object-cover "
+                              style={{ zIndex: 2 }}
+                              onError={(e) => {
+                                e.target.style.display = "none";
+                              }}
+                              unoptimized
+                            />
+                          )}
                         </div>
                         <div className="flex items-center justify-between min-h-min pb-1 mx-2">
                           <span className="text-xs font-semibold">

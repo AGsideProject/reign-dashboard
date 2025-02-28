@@ -324,7 +324,9 @@ export default function Page() {
       cover_img: model.cover_img || null,
     };
     setFormData(dataEdit);
-    setPreviewCoverImage(model.cover_img);
+    setPreviewCoverImage(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}${model.cover_img}`
+    );
     setModelSheet(true);
   };
 
@@ -483,14 +485,15 @@ export default function Page() {
                           style={{ objectFit: "cover" }}
                         />
                         <Image
-                          src={model.cover_img}
+                          src={`${process.env.NEXT_PUBLIC_API_BASE_URL}${model.cover_img}`}
                           alt={model.name}
                           sizes="(max-width: 768px) 100vw, 33vw"
                           fill={true}
                           priority
                           placeholder="blur"
-                          blurDataURL={model.cover_img}
+                          blurDataURL={`${process.env.NEXT_PUBLIC_API_BASE_URL}${model.cover_img}`}
                           style={{ objectFit: "cover" }}
+                          unoptimized
                         />
                       </div>
                     </div>
